@@ -7,9 +7,9 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 
 import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
-
 org.firstinspires.ftc.teamcode.Auto.DrivetrainSquIDController
-@Autonomous(name = "SquID Tuner", group = "Cheezits")
+
+@Autonomous(name = "SquID Tuner", group = "Auto")
 public class SquIDTuner extends LinearOpMode {
 
     public static double looptimeAdjuster = 15;

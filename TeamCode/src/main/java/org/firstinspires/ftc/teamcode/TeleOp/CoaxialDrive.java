@@ -78,7 +78,7 @@ public class CoaxialDrive {
     public double getAngle(double ypos, double xpos) {
         Log.i("GETTING ANGLE TO MOVE SERVOS: ", "X: " + xpos + " Y: " + ypos);
         //Given an input of x and y pos from controller return angle formed
-        Log.i("GOT ANGLE TO TURN SERVOS: ", "ANGLE: " + Math.toDegrees(Math.atan2(ypos, xpos)) + " degrees")
+        Log.i("GOT ANGLE TO TURN SERVOS: ", "ANGLE: " + Math.toDegrees(Math.atan2(ypos, xpos)) + " degrees");
         return (Math.toDegrees(Math.atan2(ypos, xpos)));
     }
 
