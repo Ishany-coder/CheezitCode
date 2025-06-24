@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
+import android.util.Log;
+
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.geometry.Pose2d;
@@ -14,8 +17,6 @@ public class DriveSplineCommand extends CommandBase {
     private final DrivetrainSquIDController squidController;
     private Pose2d currentPose;
     private final Pose2d targetPose;
-    private final long duration;
-    private long startTime;
 
     /**
      * Constructs a DriveSplineCommand to move the robot along a smooth trajectory
@@ -28,14 +29,12 @@ public class DriveSplineCommand extends CommandBase {
      * @param timeSeconds     The duration (in seconds) for the movement.
      */
     public DriveSplineCommand(CoaxialDrive drive, DrivetrainSquIDController squidController, Pose2d start, Pose2d end, double timeSeconds) {
+
         this.drive = drive;  // Assign the Drive subsystem to control movement.
         this.squidController = squidController;  // Assign SquID for trajectory adjustments.
 
         this.currentPose = start;  // Set the initial pose of the robot.
         this.targetPose = end;  // Set the target pose where the robot should move.
-
-        // Convert time duration from seconds to milliseconds for precise timing.
-        this.duration = (long) (timeSeconds * 1000);
 
         // Register this command as requiring control of the Drive subsystem.
         addRequirements((Subsystem) drive);
@@ -43,20 +42,20 @@ public class DriveSplineCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        startTime = System.currentTimeMillis();
+        Log.i("STATUS: ", "INITIALIZED");
     }
 
     @Override
     public void execute() {
         // Estimate movement correction using SquIDController
         Pose2d movement = squidController.calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
-
         // Convert movement into an angle for servos
         double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
 
         // Schedule commands sequentially: first turn, then move forward
         CommandScheduler.getInstance().schedule(
-                new SequentialCommandGroup(
+                //Move wheels and robot in parallel
+                new ParallelCommandGroup(
                         new InstantCommand(() -> drive.turn(angle)), // Turn wheels first
                         new InstantCommand(() -> drive.moveForward()) // Then move forward
                 )

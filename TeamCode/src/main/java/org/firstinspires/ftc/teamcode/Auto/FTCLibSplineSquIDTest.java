@@ -34,9 +34,7 @@ public class FTCLibSplineSquIDTest extends CommandOpMode {
         // Schedule movement sequence using FTC Lib Commands
         CommandScheduler.getInstance().schedule(
                 new SequentialCommandGroup(
-                        new ParallelCommandGroup(
-                                new DriveSplineCommand(drive, squidController, currentPose, targetPose, 2.0) // Move smoothly
-                        ),
+                        new DriveSplineCommand(drive, squidController, currentPose, targetPose, 2.0), // Move smoothly to target position
                         new InstantCommand(() -> drive.stop()) // Stop servos when done
                 )
         );
