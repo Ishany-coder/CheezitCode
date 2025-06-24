@@ -1,24 +1,24 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.TeleOp.SwerveDrive;
 
 @TeleOp(name="cheezitsSwerve", group="CheezitsTeleOp")
 public class CheezitSwerveDrive extends LinearOpMode {
     private double turn;
     private double xpos;
     private double ypos;
-    private double ServoPosition;
-    SwerveDrive myHardware;
+    private double Angle;
+    CoaxialDrive mySwerve;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        myHardware = new SwerveDrive(this.hardwareMap);
+        mySwerve = new CoaxialDrive(this.hardwareMap);
 
         while (opModeIsActive()) {
             // Read gamepad input
@@ -27,30 +27,45 @@ public class CheezitSwerveDrive extends LinearOpMode {
             ypos = -gamepad1.right_stick_y;
 
             // Calculate servo position for turning
-            ServoPosition = myHardware.getAngle(ypos, xpos);
+            Angle = mySwerve.getAngle(ypos, xpos);
 
             // Schedule turning the wheels first, then moving forward
-            //if ypos > 0 move forward
-            if(ypos > 0) {
-                CommandScheduler.getInstance().schedule(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> myHardware.turnDriveMotors(ServoPosition)), // Turn wheels
-                                new InstantCommand(myHardware::moveForward) // Move forward
-                        )
-                );
-                // at any point if the ypos is less then 0 then move back
-            } else if (ypos < 0) {
-                CommandScheduler.getInstance().schedule(
-                        new SequentialCommandGroup(
-                                new InstantCommand(() -> myHardware.turnDriveMotors(ServoPosition)),
-                                new InstantCommand(() -> myHardware.moveBackward())
-                        )
-                );
-
+            try {
+                if (ypos > 0) {
+                    CommandScheduler.getInstance().schedule(
+                            new SequentialCommandGroup(
+                                    new InstantCommand(() -> mySwerve.turn(Angle)), // Turn wheels
+                                    new InstantCommand(() -> mySwerve.moveForward()) // Move forward
+                            )
+                    );
+                } else if (ypos < 0) {
+                    CommandScheduler.getInstance().schedule(
+                            new SequentialCommandGroup(
+                                    new InstantCommand(() -> mySwerve.turn(Angle)),
+                                    new InstantCommand(() -> mySwerve.moveBackward())
+                            )
+                    );
+                }
+                if(turn > 0){
+                    CommandScheduler.getInstance().schedule(
+                            new ParallelCommandGroup(
+                                    new InstantCommand(() -> mySwerve.turn(Angle)),
+                                    new InstantCommand(() -> mySwerve.moveForward())
+                            )
+                    );
+                }
+                else if(turn < 0){
+                    CommandScheduler.getInstance().schedule(
+                            new ParallelCommandGroup(
+                                    new InstantCommand(() -> mySwerve.turn(Angle)),
+                                    new InstantCommand(() -> mySwerve.moveBackward())
+                            )
+                    );
+                }
             }
-            // as long as turn doesnt equal null we turn
-            if (turn != 0) {
-                myHardware.turn(turn);
+            catch (Exception e){
+                telemetry.addData("Error", e);
+                telemetry.update();
             }
         }
     }
