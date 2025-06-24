@@ -1,17 +1,20 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
+import android.util.Log;
+
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.CheezitsTeleop.Drive;
+import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
+import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 
 // This is an example file using Squid that takes the robot from its starting position to the point (24,0)
 // it continously updates its position and stops when it reaches within 1 inch of the target position
 @Autonomous(name="Cheezits Auto SquID", group="Cheezits")
 public class ExampleLinearMovement extends LinearOpMode {
-    private Drive myHardware;
+    private CoaxialDrive myHardware;
     private DrivetrainSquIDController drivetrain;
     private Pose2d currentPose;
     private Pose2d targetPose;
@@ -19,7 +22,7 @@ public class ExampleLinearMovement extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Initialize hardware and drivetrain
-        myHardware = new Drive(this.hardwareMap);
+        myHardware = new CoaxialDrive(this.hardwareMap);
         drivetrain = new DrivetrainSquIDController();
 
         telemetry.addData("Status", "Initialized");
@@ -39,8 +42,13 @@ public class ExampleLinearMovement extends LinearOpMode {
 
             // Convert movement to servo position
             double servoPosition = myHardware.getAngle(movement.getY(), movement.getX());
-            myHardware.turnDriveMotors(servoPosition);
-
+            myHardware.turn(servoPosition);
+            if(movement.getY() > 0){
+                myHardware.moveForward();
+            }
+            else if(movement.getY() < 0){
+                myHardware.moveBackward();
+            }
             // Update position estimation
             currentPose = new Pose2d(
                     currentPose.getX() + movement.getX() * runtime.seconds(),
@@ -49,15 +57,11 @@ public class ExampleLinearMovement extends LinearOpMode {
             );
 
             // Stop if close to target
-            if (currentPose.getTranslation().getDistance(targetPose.getTranslation()) < 1) {
+            if (currentPose.getTranslation().getDistance(targetPose.getTranslation()) < 0.5) {
                 break;
             }
-
-            telemetry.addData("Target Pose", targetPose);
-            telemetry.addData("Current Pose", currentPose);
-            telemetry.addData("Servo Position", servoPosition);
-            telemetry.update();
+            Log.i("MOVING ROBOT ", "TO POSE: " + targetPose);
+            Log.i("MOVING ROBOT ", "AT POSE: " + currentPose);
         }
-        myHardware.stopServos();
     }
 }

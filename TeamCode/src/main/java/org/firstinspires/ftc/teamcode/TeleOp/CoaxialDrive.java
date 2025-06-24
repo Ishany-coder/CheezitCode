@@ -103,4 +103,12 @@ public class CoaxialDrive {
         MotorPod3.setPower(MotorSpeed);
         MotorPod4.setPower(MotorSpeed);
     }
+    public void stop(){
+        Log.i("STATUS: ", "STOPPED");
+        //Stop motors
+        MotorPod1.setPower(0);
+        MotorPod2.setPower(0);
+        MotorPod3.setPower(0);
+        MotorPod4.setPower(0);
+    }
 }

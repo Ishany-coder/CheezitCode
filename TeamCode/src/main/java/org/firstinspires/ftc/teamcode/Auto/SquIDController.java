@@ -11,6 +11,7 @@ public class SquIDController {
         this.p = p;
     }
     public double calculate(double setpoint, double current){
+        // Calculate the error
         return Math.sqrt(Math.abs((setpoint - current) * p)) * Math.signum(setpoint - current);
     }
 }

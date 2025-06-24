@@ -1,17 +1,19 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
+import android.util.Log;
+
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.CheezitsTeleop.Drive;
+import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 
 @Autonomous(name="Cheezits Turn Test", group="Cheezits")
 public class exampleTurn extends LinearOpMode {
 
-    private Drive myHardware;
+    private CoaxialDrive myHardware;
     private DrivetrainSquIDController drivetrain;
     private Pose2d currentPose;
     private Pose2d targetPose;
@@ -19,7 +21,7 @@ public class exampleTurn extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Initialize hardware and drivetrain
-        myHardware = new Drive(this.hardwareMap);
+        myHardware = new CoaxialDrive(this.hardwareMap);
         drivetrain = new DrivetrainSquIDController();
 
         telemetry.addData("Status", "Initialized");
@@ -38,11 +40,10 @@ public class exampleTurn extends LinearOpMode {
             Pose2d turnAdjustment = drivetrain.calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
 
             // Extract rotation adjustment
-            double turnAngle = turnAdjustment.getRotation().getRadians();
+            double turnAngle = Math.toDegrees(turnAdjustment.getRotation().getRadians());
 
             // Convert the turn adjustment to a servo position
-            double servoPosition = (turnAngle / Math.PI) + 0.5; // Normalize to [0,1]
-            myHardware.turnDriveMotors(servoPosition);
+            myHardware.turn((turnAngle));
 
             // Update estimated rotation
             currentPose = new Pose2d(
@@ -54,13 +55,10 @@ public class exampleTurn extends LinearOpMode {
             if (Math.abs(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians()) < Math.toRadians(2)) {
                 break;
             }
-
-            telemetry.addData("Target Rotation", Math.toDegrees(targetPose.getRotation().getRadians()));
-            telemetry.addData("Current Rotation", Math.toDegrees(currentPose.getRotation().getRadians()));
-            telemetry.addData("Servo Position", servoPosition);
-            telemetry.update();
+            Log.i("MOVING ROBOT ", "TO TARGET ROTATION: " + Math.toDegrees(targetPose.getRotation().getRadians()));
+            Log.i("MOVING ROBOT ", "AT CURRENT ROTATION: " + Math.toDegrees(currentPose.getRotation().getRadians()));
         }
 
-        myHardware.stopServos(); // Stop servos after turning
+        myHardware.stop(); // Stop servos after turning
     }
 }

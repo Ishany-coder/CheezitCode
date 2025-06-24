@@ -52,13 +52,13 @@ public class DriveSplineCommand extends CommandBase {
         Pose2d movement = squidController.calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
 
         // Convert movement into an angle for servos
-        double angle = Math.atan2(movement.getY(), movement.getX()) / Math.PI;
+        double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
 
         // Schedule commands sequentially: first turn, then move forward
         CommandScheduler.getInstance().schedule(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> drive.turnDriveMotors(angle)), // Turn wheels first
-                        new InstantCommand(drive::moveForward) // Then move forward
+                        new InstantCommand(() -> drive.turn(angle)), // Turn wheels first
+                        new InstantCommand(() -> drive.moveForward()) // Then move forward
                 )
         );
 
@@ -72,11 +72,14 @@ public class DriveSplineCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return System.currentTimeMillis() - startTime >= duration;
+        //If the robot reaches its end destination stop the code
+        return (currentPose.getX() - targetPose.getX() >= 1) &&
+                (currentPose.getY() - targetPose.getY() > 1) &&
+                (currentPose.getHeading() - targetPose.getHeading() > 1);
     }
 
     @Override
     public void end(boolean interrupted) {
-        drive.stopServos();
+        drive.stop();
     }
 }
