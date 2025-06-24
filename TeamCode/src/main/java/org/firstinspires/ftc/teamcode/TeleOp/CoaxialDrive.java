@@ -3,7 +3,11 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.geometry.Pose2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,6 +15,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.Auto.DrivetrainSquIDController;
 
 //change the code so at certain points it can use 1 motor to turn and move the wheel simultaneously
 @Config
@@ -25,8 +31,10 @@ public class CoaxialDrive {
     private DcMotorEx MotorPod2;
     private DcMotorEx MotorPod3;
     private DcMotorEx MotorPod4;
+    private DrivetrainSquIDController squid;
 
     public CoaxialDrive(HardwareMap hardwareMap) {
+        squid = new DrivetrainSquIDController();
         Log.i("STATUS: ", "INITIALIZED");
         //Initialize motors and their behaviors
         MotorPod1 = hardwareMap.get(DcMotorEx.class, "MotorPod1");
@@ -112,5 +120,34 @@ public class CoaxialDrive {
         MotorPod2.setPower(0);
         MotorPod3.setPower(0);
         MotorPod4.setPower(0);
+    }
+    //function to move robot linearly to a point
+    public void MoveRobotLinear(Pose2d targetPose, Pose2d currentPose){
+        Pose2d movement = squid.calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
+        Log.i("MOVING ROBOT: ", "LINEAR MOVEMENT");
+        double angle = getAngle(movement.getY(), movement.getX());
+        //move forward
+        if(movement.getY() > 0){
+            Log.i("MOVING ROBOT LINEARLY: ", "FORWARD");
+            CommandScheduler.getInstance().schedule(
+                    new SequentialCommandGroup(
+                            new InstantCommand(() -> turn(angle)),
+                            new InstantCommand(() -> moveForward())
+                    )
+            );
+        }
+        else if(movement.getY() < 0){
+            Log.i("MOVING ROBOT LINEARLY: ", "BACKWARD");
+            CommandScheduler.getInstance().schedule(
+                    new SequentialCommandGroup(
+                            new InstantCommand(() -> turn(angle)),
+                            new InstantCommand(() -> moveBackward())
+                    )
+            );
+        }
+        if(currentPose.getTranslation().getDistance(targetPose.getTranslation()) < 0.5){
+            Log.i("MOVING ROBOT LINEARLY: ", "STOPPED");
+            stop();
+        }
     }
 }

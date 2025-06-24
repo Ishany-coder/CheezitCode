@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 @Autonomous(name="Cheezits Auto SquID", group="Cheezits")
 public class ExampleLinearMovement extends LinearOpMode {
     private CoaxialDrive myHardware;
-    private DrivetrainSquIDController drivetrain;
     private Pose2d currentPose;
     private Pose2d targetPose;
 
@@ -23,7 +22,6 @@ public class ExampleLinearMovement extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Initialize hardware and drivetrain
         myHardware = new CoaxialDrive(this.hardwareMap);
-        drivetrain = new DrivetrainSquIDController();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -38,30 +36,7 @@ public class ExampleLinearMovement extends LinearOpMode {
 
         while (opModeIsActive()) {
             // Calculate movement using SquIDController
-            Pose2d movement = drivetrain.calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
-
-            // Convert movement to servo position
-            double servoPosition = myHardware.getAngle(movement.getY(), movement.getX());
-            myHardware.turn(servoPosition);
-            if(movement.getY() > 0){
-                myHardware.moveForward();
-            }
-            else if(movement.getY() < 0){
-                myHardware.moveBackward();
-            }
-            // Update position estimation
-            currentPose = new Pose2d(
-                    currentPose.getX() + movement.getX() * runtime.seconds(),
-                    currentPose.getY() + movement.getY() * runtime.seconds(),
-                    new Rotation2d(0)
-            );
-
-            // Stop if close to target
-            if (currentPose.getTranslation().getDistance(targetPose.getTranslation()) < 0.5) {
-                break;
-            }
-            Log.i("MOVING ROBOT ", "TO POSE: " + targetPose);
-            Log.i("MOVING ROBOT ", "AT POSE: " + currentPose);
+            myHardware.MoveRobotLinear(targetPose, currentPose);
         }
     }
 }

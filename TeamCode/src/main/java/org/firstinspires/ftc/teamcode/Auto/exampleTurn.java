@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 public class exampleTurn extends LinearOpMode {
 
     private CoaxialDrive myHardware;
-    private DrivetrainSquIDController drivetrain;
     private Pose2d currentPose;
     private Pose2d targetPose;
 
@@ -22,7 +21,6 @@ public class exampleTurn extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Initialize hardware and drivetrain
         myHardware = new CoaxialDrive(this.hardwareMap);
-        drivetrain = new DrivetrainSquIDController();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -33,28 +31,8 @@ public class exampleTurn extends LinearOpMode {
         currentPose = new Pose2d(0, 0, new Rotation2d(0)); // Facing forward
         targetPose = new Pose2d(0, 0, new Rotation2d(Math.toRadians(90))); // Rotate to 90 degrees
 
-        ElapsedTime runtime = new ElapsedTime();
-
         while (opModeIsActive()) {
-            // Calculate turning adjustment using SquIDController
-            Pose2d turnAdjustment = drivetrain.calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
-
-            // Extract rotation adjustment
-            double turnAngle = Math.toDegrees(turnAdjustment.getRotation().getRadians());
-
-            // Convert the turn adjustment to a servo position
-            myHardware.turn((turnAngle));
-
-            // Update estimated rotation
-            currentPose = new Pose2d(
-                    0, 0, // No translation, just rotation
-                    new Rotation2d(currentPose.getRotation().getRadians() + (turnAngle * runtime.seconds()))
-            );
-
-            // Stop when close to target (within 2 degrees)
-            if (Math.abs(targetPose.getRotation().getRadians() - currentPose.getRotation().getRadians()) < Math.toRadians(2)) {
-                break;
-            }
+            myHardware.MoveRobotLinear(targetPose, currentPose);
             Log.i("MOVING ROBOT ", "TO TARGET ROTATION: " + Math.toDegrees(targetPose.getRotation().getRadians()));
             Log.i("MOVING ROBOT ", "AT CURRENT ROTATION: " + Math.toDegrees(currentPose.getRotation().getRadians()));
         }
