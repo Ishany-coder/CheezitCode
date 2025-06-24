@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -23,6 +25,7 @@ public class CoaxialDrive {
     private DcMotorEx MotorPod4;
 
     public CoaxialDrive(HardwareMap hardwareMap) {
+        Log.i("STATUS: ", "INITIALIZED");
         //Initialize motors and their behaviors
         MotorPod1 = hardwareMap.get(DcMotorEx.class, "MotorPod1");
         MotorPod1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -46,8 +49,10 @@ public class CoaxialDrive {
         ServoPod4 = hardwareMap.get(Servo.class, "ServoPod4");
     }
     public void turn(double angle) {
+        Log.i("TURNING SERVOS ", "ANGLE: " + angle);
         //Move Right
         if(ServoPod1.getPosition()*ServoDegrees > angle){
+            Log.i("TURNING SERVOS: ", "RIGHT");
             //Move Servos
             ServoPod1.setPosition(angle/ServoDegrees);
             ServoPod2.setPosition(angle/ServoDegrees);
@@ -56,6 +61,7 @@ public class CoaxialDrive {
         }
         //Move Left
         else if(ServoPod1.getPosition() * ServoDegrees < angle){
+            Log.i("TURNING SERVOS: ", "LEFT");
             //Set the direction to reverse or left then move
             ServoPod1.setDirection(Servo.Direction.REVERSE);
             ServoPod2.setDirection(Servo.Direction.REVERSE);
@@ -70,11 +76,14 @@ public class CoaxialDrive {
     }
 
     public double getAngle(double ypos, double xpos) {
+        Log.i("GETTING ANGLE TO MOVE SERVOS: ", "X: " + xpos + " Y: " + ypos);
         //Given an input of x and y pos from controller return angle formed
+        Log.i("GOT ANGLE TO TURN SERVOS: ", "ANGLE: " + Math.toDegrees(Math.atan2(ypos, xpos)) + " degrees")
         return (Math.toDegrees(Math.atan2(ypos, xpos)));
     }
 
     public void moveForward() {
+        Log.i("MOVING ROBOT: ", "FORWARD");
         //Move motors forward
         MotorPod1.setPower(MotorSpeed);
         MotorPod2.setPower(MotorSpeed);
@@ -83,6 +92,7 @@ public class CoaxialDrive {
     }
 
     public void moveBackward() {
+        Log.i("MOVING ROBOT: ", "BACKWARD");
         // move Backward
         MotorPod1.setDirection(DcMotorSimple.Direction.REVERSE);
         MotorPod2.setDirection(DcMotorSimple.Direction.REVERSE);

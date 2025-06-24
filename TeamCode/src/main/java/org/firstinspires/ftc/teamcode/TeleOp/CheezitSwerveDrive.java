@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import android.util.Log;
+
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
@@ -32,6 +34,7 @@ public class CheezitSwerveDrive extends LinearOpMode {
             // Schedule turning the wheels first, then moving forward
             try {
                 if (ypos > 0) {
+                    Log.i("CHEEZITS MOVING ROBOT: ", " FORWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new SequentialCommandGroup(
                                     new InstantCommand(() -> mySwerve.turn(Angle)), // Turn wheels
@@ -39,6 +42,7 @@ public class CheezitSwerveDrive extends LinearOpMode {
                             )
                     );
                 } else if (ypos < 0) {
+                    Log.i("CHEEZITS MOVING ROBOT: ", "BACKWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new SequentialCommandGroup(
                                     new InstantCommand(() -> mySwerve.turn(Angle)),
@@ -46,7 +50,9 @@ public class CheezitSwerveDrive extends LinearOpMode {
                             )
                     );
                 }
+                // Logic to turn bobot
                 if(turn > 0){
+                    Log.i("CHEEZITS MOVING ROBOT: ", "TURNING FORWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new ParallelCommandGroup(
                                     new InstantCommand(() -> mySwerve.turn(Angle)),
@@ -55,6 +61,7 @@ public class CheezitSwerveDrive extends LinearOpMode {
                     );
                 }
                 else if(turn < 0){
+                    Log.i("CHEEZITS MOVING ROBOT: ", "TURNING BACKWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new ParallelCommandGroup(
                                     new InstantCommand(() -> mySwerve.turn(Angle)),
