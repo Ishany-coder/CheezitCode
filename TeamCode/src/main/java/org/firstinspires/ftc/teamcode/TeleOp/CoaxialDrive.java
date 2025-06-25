@@ -8,6 +8,10 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.arcrobotics.ftclib.trajectory.Trajectory;
+import com.arcrobotics.ftclib.trajectory.TrajectoryConfig;
+import com.arcrobotics.ftclib.trajectory.TrajectoryGenerator;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,9 +22,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Auto.DrivetrainSquIDController;
 
+import java.util.List;
+
 //change the code so at certain points it can use 1 motor to turn and move the wheel simultaneously
 @Config
 public class CoaxialDrive {
+    public static double maxVelocitySpline = 10;
+    public static double maxAccelSpline = 10;
     public double ServoDegrees = 300;
     public static double MotorSpeed = 1;
     private Servo ServoPod1;
@@ -35,7 +43,7 @@ public class CoaxialDrive {
 
     public CoaxialDrive(HardwareMap hardwareMap) {
         squid = new DrivetrainSquIDController();
-        Log.i("STATUS: ", "INITIALIZED");
+        Log.i("DRIVE TRAIN STATUS: ", "INITIALIZED");
         //Initialize motors and their behaviors
         MotorPod1 = hardwareMap.get(DcMotorEx.class, "MotorPod1");
         MotorPod1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -149,5 +157,21 @@ public class CoaxialDrive {
             Log.i("MOVING ROBOT LINEARLY: ", "STOPPED");
             stop();
         }
+    }
+    //Use ftc lib spline squid implementation later
+    public void MoveRobotSplineFTClib(Pose2d targetPose, Pose2d currentPose, List<Translation2d> midPoints){
+        //way points like midpoints for spline
+        Log.i("MOVING ROBOT: ", "SPLINE MOVEMENT");
+        //Create config
+        TrajectoryConfig config = new TrajectoryConfig(maxVelocitySpline, maxAccelSpline);
+        //Make spline w/ ftc lib
+        TrajectoryGenerator.generateTrajectory(
+            currentPose,
+            midPoints,
+            targetPose,
+            config
+        );
+        Log.i("SPLINE MOVEMENT: ", "DONE");
+        stop();
     }
 }
