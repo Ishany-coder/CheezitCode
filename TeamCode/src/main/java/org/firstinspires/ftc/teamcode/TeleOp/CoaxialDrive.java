@@ -238,6 +238,8 @@ public class CoaxialDrive {
         return path;
     }
 
+    //Thomas formula where it computes the second dirivatives of a triangular matric
+    //First sets up the equation
     private static double[] computeSecondDerivatives(double[] time, double[] values) {
         int numPoints = time.length;
         double[] interval = new double[numPoints - 1];
@@ -285,34 +287,37 @@ public class CoaxialDrive {
            List<Pose2d> Points = generateCubicSplinePath(currentPose, midPoints, targetPose); //Get a returned list of points
            Log.i("MOVING ROBOT: ", "SPLINE MOVEMENT");
             for (Pose2d point : Points) {
-                if (point.getY() > 0) {
-                    //Move and turn everything forward maybe change sequential to parallel?
-                    CommandScheduler.getInstance().schedule(
-                            new SequentialCommandGroup(
-                                    new InstantCommand(() -> turn(point.getHeading())),
-                                    new InstantCommand(() -> moveForward()),
-                                    new ParallelCommandGroup(
-                                            new InstantCommand(() -> turn(point.getHeading())),
-                                            new InstantCommand(() -> moveBackward())
-
-                                    )
-                            )
-                    );
-                }
-                else if(point.getY() < 0){
-                    CommandScheduler.getInstance().schedule(
-                            //Move and turn everything backward maybe change sequential to parallel?
-                            new SequentialCommandGroup(
-                                    new InstantCommand(() -> turn(point.getHeading())),
-                                    new InstantCommand(() -> moveBackward()),
-                                    new ParallelCommandGroup(
-                                            new InstantCommand(() -> turn(point.getHeading())),
-                                            new InstantCommand(() -> moveBackward())
-
-                                    )
-                            )
-                    );
-                }
+                moveLinearAndTurn(point);
             }
+    }
+    public void moveLinearAndTurn(Pose2d targetPose){
+        if (targetPose.getY() > 0) {
+            //Move and turn everything forward maybe change sequential to parallel?
+            CommandScheduler.getInstance().schedule(
+                    new SequentialCommandGroup(
+                            new InstantCommand(() -> turn(targetPose.getHeading())),
+                            new InstantCommand(() -> moveForward()),
+                            new ParallelCommandGroup(
+                                    new InstantCommand(() -> turn(targetPose.getHeading())),
+                                    new InstantCommand(() -> moveBackward())
+
+                            )
+                    )
+            );
+        }
+        else if(targetPose.getY() < 0){
+            CommandScheduler.getInstance().schedule(
+                    //Move and turn everything backward maybe change sequential to parallel?
+                    new SequentialCommandGroup(
+                            new InstantCommand(() -> turn(targetPose.getHeading())),
+                            new InstantCommand(() -> moveBackward()),
+                            new ParallelCommandGroup(
+                                    new InstantCommand(() -> turn(targetPose.getHeading())),
+                                    new InstantCommand(() -> moveBackward())
+
+                            )
+                    )
+            );
+        }
     }
 }
