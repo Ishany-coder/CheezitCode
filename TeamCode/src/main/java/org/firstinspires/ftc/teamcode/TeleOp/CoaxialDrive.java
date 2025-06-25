@@ -5,6 +5,7 @@ import android.util.Log;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
@@ -22,6 +23,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Auto.DrivetrainSquIDController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 //change the code so at certain points it can use 1 motor to turn and move the wheel simultaneously
@@ -161,7 +163,7 @@ public class CoaxialDrive {
     //Use ftc lib spline squid implementation later
     public void MoveRobotSplineFTClib(Pose2d targetPose, Pose2d currentPose, List<Translation2d> midPoints){
         //way points like midpoints for spline
-        Log.i("MOVING ROBOT: ", "SPLINE MOVEMENT");
+        Log.i("MOVING ROBOT: ", "SPLINE MOVEMENT FTCLIB");
         //Create config
         TrajectoryConfig config = new TrajectoryConfig(maxVelocitySpline, maxAccelSpline);
         //Make spline w/ ftc lib
@@ -173,5 +175,144 @@ public class CoaxialDrive {
         );
         Log.i("SPLINE MOVEMENT: ", "DONE");
         stop();
+    }
+
+    public static List<Pose2d> generateCubicSplinePath(Pose2d startPose, List<Translation2d> interiorPoints, Pose2d endPose) {
+        // Combine all points: start, interior, end
+        List<Translation2d> points = new ArrayList<>();
+        points.add(startPose.getTranslation());
+        points.addAll(interiorPoints);
+        points.add(endPose.getTranslation());
+        int numSamples = interiorPoints.size();
+
+        int pointCount = points.size();
+        double[] t = new double[pointCount];
+        for (int i = 0; i < pointCount; i++) t[i] = i;
+
+        // Extract x and y coordinates
+        double[] xValues = new double[pointCount];
+        double[] yValues = new double[pointCount];
+        for (int i = 0; i < pointCount; i++) {
+            xValues[i] = points.get(i).getX();
+            yValues[i] = points.get(i).getY();
+        }
+
+        // Compute second derivatives for x and y
+        double[] xSecondDerivatives = computeSecondDerivatives(t, xValues);
+        double[] ySecondDerivatives = computeSecondDerivatives(t, yValues);
+
+        List<Pose2d> path = new ArrayList<>();
+
+        for (int sample = 0; sample <= numSamples; sample++) {
+            double tSample = (pointCount - 1) * sample / (double)numSamples;
+            int segmentIndex = Math.min((int)Math.floor(tSample), pointCount - 2);
+            double segmentStart = t[segmentIndex];
+            double segmentEnd = t[segmentIndex + 1];
+            double segmentLength = segmentEnd - segmentStart;
+
+            double weightStart = (segmentEnd - tSample) / segmentLength;
+            double weightEnd = (tSample - segmentStart) / segmentLength;
+
+            double xPos = weightStart * xValues[segmentIndex] + weightEnd * xValues[segmentIndex + 1]
+                    + ((Math.pow(weightStart, 3) - weightStart) * xSecondDerivatives[segmentIndex]
+                    + (Math.pow(weightEnd, 3) - weightEnd) * xSecondDerivatives[segmentIndex + 1])
+                    * Math.pow(segmentLength, 2) / 6.0;
+
+            double yPos = weightStart * yValues[segmentIndex] + weightEnd * yValues[segmentIndex + 1]
+                    + ((Math.pow(weightStart, 3) - weightStart) * ySecondDerivatives[segmentIndex]
+                    + (Math.pow(weightEnd, 3) - weightEnd) * ySecondDerivatives[segmentIndex + 1])
+                    * Math.pow(segmentLength, 2) / 6.0;
+
+            double dx = (xValues[segmentIndex + 1] - xValues[segmentIndex]) / segmentLength
+                    - (3 * weightStart * weightStart - 1) * segmentLength * xSecondDerivatives[segmentIndex] / 6
+                    + (3 * weightEnd * weightEnd - 1) * segmentLength * xSecondDerivatives[segmentIndex + 1] / 6;
+
+            double dy = (yValues[segmentIndex + 1] - yValues[segmentIndex]) / segmentLength
+                    - (3 * weightStart * weightStart - 1) * segmentLength * ySecondDerivatives[segmentIndex] / 6
+                    + (3 * weightEnd * weightEnd - 1) * segmentLength * ySecondDerivatives[segmentIndex + 1] / 6;
+
+            double heading = Math.atan2(dy, dx);
+
+            path.add(new Pose2d(xPos, yPos, new Rotation2d(heading)));
+        }
+        return path;
+    }
+
+    private static double[] computeSecondDerivatives(double[] time, double[] values) {
+        int numPoints = time.length;
+        double[] interval = new double[numPoints - 1];
+
+        for (int i = 0; i < numPoints - 1; i++) {
+            interval[i] = time[i + 1] - time[i];
+        }
+
+        double[] rhs = new double[numPoints];
+        for (int i = 1; i < numPoints - 1; i++) {
+            double slopeNext = (values[i + 1] - values[i]) / interval[i];
+            double slopePrev = (values[i] - values[i - 1]) / interval[i - 1];
+            rhs[i] = 3 * (slopeNext - slopePrev);
+        }
+
+        double[] mainDiag = new double[numPoints];
+        double[] upperDiag = new double[numPoints];
+        double[] lowerDiag = new double[numPoints];
+        double[] secondDeriv = new double[numPoints];
+
+        mainDiag[0] = 1;
+        for (int i = 1; i < numPoints - 1; i++) {
+            mainDiag[i] = 2 * (time[i + 1] - time[i - 1]);
+            upperDiag[i] = interval[i];
+            lowerDiag[i] = interval[i - 1];
+        }
+        mainDiag[numPoints - 1] = 1;
+
+        // Forward elimination
+        for (int i = 1; i < numPoints; i++) {
+            double scale = lowerDiag[i] / mainDiag[i - 1];
+            mainDiag[i] -= scale * upperDiag[i - 1];
+            rhs[i] -= scale * rhs[i - 1];
+        }
+
+        // Back substitution
+        secondDeriv[numPoints - 1] = rhs[numPoints - 1] / mainDiag[numPoints - 1];
+        for (int i = numPoints - 2; i >= 0; i--) {
+            secondDeriv[i] = (rhs[i] - upperDiag[i] * secondDeriv[i + 1]) / mainDiag[i];
+        }
+
+        return secondDeriv;
+    }
+    public void DriveSpline(Pose2d currentPose, List<Translation2d> midPoints, Pose2d targetPose){
+           List<Pose2d> Points = generateCubicSplinePath(currentPose, midPoints, targetPose); //Get a returned list of points
+           Log.i("MOVING ROBOT: ", "SPLINE MOVEMENT");
+            for (Pose2d point : Points) {
+                if (point.getY() > 0) {
+                    //Move and turn everything forward maybe change sequential to parallel?
+                    CommandScheduler.getInstance().schedule(
+                            new SequentialCommandGroup(
+                                    new InstantCommand(() -> turn(point.getHeading())),
+                                    new InstantCommand(() -> moveForward()),
+                                    new ParallelCommandGroup(
+                                            new InstantCommand(() -> turn(point.getHeading())),
+                                            new InstantCommand(() -> moveBackward())
+
+                                    )
+                            )
+                    );
+                }
+                else if(point.getY() < 0){
+                    CommandScheduler.getInstance().schedule(
+                            //Move and turn everything backward maybe change sequential to parallel?
+                            new SequentialCommandGroup(
+                                    new InstantCommand(() -> turn(point.getHeading())),
+                                    new InstantCommand(() -> moveBackward()),
+                                    new ParallelCommandGroup(
+                                            new InstantCommand(() -> turn(point.getHeading())),
+                                            new InstantCommand(() -> moveBackward())
+
+                                    )
+                            )
+                    );
+                }
+            }
     }
 }
