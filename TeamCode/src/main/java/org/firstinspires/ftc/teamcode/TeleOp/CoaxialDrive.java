@@ -375,6 +375,56 @@ public class CoaxialDrive {
         }
         return curvePoses;
     }
+    public static List<Pose2d> makeBezierWithHeadingV2(
+            Pose2d startPose,
+            Pose2d endPose,
+            Pose2d controlPoint1,
+            Pose2d controlPoint2,
+            int numPoints
+    ) {
+        Vector2d P0 = new Vector2d(startPose.getX(), startPose.getY());
+        Vector2d P3 = new Vector2d(startPose.getX(), startPose.getY());
+
+        Vector2d control1 = new Vector2d(controlPoint1.getX(), controlPoint1.getY());
+
+        Vector2d control2 = new Vector2d(controlPoint2.getX(), controlPoint2.getY());
+
+        Vector2d P1 = P0.plus(control1);
+        Vector2d P2 = P3.minus(control2);
+
+        List<Pose2d> curvePoses = new ArrayList<>();
+
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints;
+            double oneMinusT = 1 - t;
+
+            // Curve position
+            double x = Math.pow(oneMinusT, 3) * P0.getX()
+                    + 3 * Math.pow(oneMinusT, 2) * t * P1.getX()
+                    + 3 * oneMinusT * Math.pow(t, 2) * P2.getX()
+                    + Math.pow(t, 3) * P3.getX();
+
+            double y = Math.pow(oneMinusT, 3) * P0.getY()
+                    + 3 * Math.pow(oneMinusT, 2) * t * P1.getY()
+                    + 3 * oneMinusT * Math.pow(t, 2) * P2.getY()
+                    + Math.pow(t, 3) * P3.getY();
+
+            // Derivative (tangent) for heading
+            double dx = 3 * Math.pow(oneMinusT, 2) * (P1.getX() - P0.getX())
+                    + 6 * oneMinusT * t * (P2.getX() - P1.getX())
+                    + 3 * Math.pow(t, 2) * (P3.getX() - P2.getX());
+
+            double dy = 3 * Math.pow(oneMinusT, 2) * (P1.getY() - P0.getY())
+                    + 6 * oneMinusT * t * (P2.getY() - P1.getY())
+                    + 3 * Math.pow(t, 2) * (P3.getY() - P2.getY());
+
+            double headingRadians = Math.atan2(dy, dx);
+            double headingDegrees = Math.toDegrees(headingRadians);
+
+            curvePoses.add(new Pose2d(x, y, Rotation2d.fromDegrees(headingDegrees)));
+        }
+        return curvePoses;
+    }
     public static void followSplinePurePursuitWithSquID(
             Pose2d currentPose,
             List<Pose2d> path,
