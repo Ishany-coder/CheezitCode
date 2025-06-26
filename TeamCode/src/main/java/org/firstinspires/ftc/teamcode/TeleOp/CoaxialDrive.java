@@ -9,7 +9,9 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.arcrobotics.ftclib.geometry.Vector2d;
 import com.arcrobotics.ftclib.trajectory.Trajectory;
 import com.arcrobotics.ftclib.trajectory.TrajectoryConfig;
 import com.arcrobotics.ftclib.trajectory.TrajectoryGenerator;
@@ -29,6 +31,7 @@ import java.util.List;
 //change the code so at certain points it can use 1 motor to turn and move the wheel simultaneously
 @Config
 public class CoaxialDrive {
+    public static double robotRadius = 10;
     public static double maxVelocitySpline = 10;
     public static double maxAccelSpline = 10;
     public double ServoDegrees = 300;
@@ -283,13 +286,6 @@ public class CoaxialDrive {
 
         return secondDeriv;
     }
-    public void DriveSpline(Pose2d currentPose, List<Translation2d> midPoints, Pose2d targetPose){
-           List<Pose2d> Points = generateCubicSplinePath(currentPose, midPoints, targetPose); //Get a returned list of points
-           Log.i("MOVING ROBOT: ", "SPLINE MOVEMENT");
-            for (Pose2d point : Points) {
-                moveLinearAndTurn(point);
-            }
-    }
     public void moveLinearAndTurn(Pose2d targetPose){
         if (targetPose.getY() > 0) {
             //Move and turn everything forward maybe change sequential to parallel?
@@ -318,6 +314,114 @@ public class CoaxialDrive {
                             )
                     )
             );
+        }
+    }
+    public void makeParabolicSpline(Pose2d currentPose, double obstacleRadius, Pose2d obstaclePos, double RobotToObstacle, double addedGapfromRobotToobs){
+        
+    }
+    public static List<Pose2d> makeBezierWithHeading(
+            Pose2d startPose,
+            Pose2d endPose,
+            double startControlDistance,
+            double endControlDistance,
+            int numPoints
+    ) {
+        Vector2d P0 = new Vector2d(startPose.getX(), startPose.getY());
+        Vector2d P3 = new Vector2d(startPose.getX(), startPose.getY());
+
+        Vector2d control1 = new Vector2d(
+                startControlDistance * Math.cos(Math.toRadians(startPose.getHeading())),
+                startControlDistance * Math.sin(Math.toRadians(startPose.getHeading()))
+        );
+
+        Vector2d control2 = new Vector2d(
+                endControlDistance * Math.cos(Math.toRadians(endPose.getHeading())),
+                endControlDistance * Math.sin(Math.toRadians(endPose.getHeading()))
+        );
+
+        Vector2d P1 = P0.plus(control1);
+        Vector2d P2 = P3.minus(control2);
+
+        List<Pose2d> curvePoses = new ArrayList<>();
+
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints;
+            double oneMinusT = 1 - t;
+
+            // Curve position
+            double x = Math.pow(oneMinusT, 3) * P0.getX()
+                    + 3 * Math.pow(oneMinusT, 2) * t * P1.getX()
+                    + 3 * oneMinusT * Math.pow(t, 2) * P2.getX()
+                    + Math.pow(t, 3) * P3.getX();
+
+            double y = Math.pow(oneMinusT, 3) * P0.getY()
+                    + 3 * Math.pow(oneMinusT, 2) * t * P1.getY()
+                    + 3 * oneMinusT * Math.pow(t, 2) * P2.getY()
+                    + Math.pow(t, 3) * P3.getY();
+
+            // Derivative (tangent) for heading
+            double dx = 3 * Math.pow(oneMinusT, 2) * (P1.getX() - P0.getX())
+                    + 6 * oneMinusT * t * (P2.getX() - P1.getX())
+                    + 3 * Math.pow(t, 2) * (P3.getX() - P2.getX());
+
+            double dy = 3 * Math.pow(oneMinusT, 2) * (P1.getY() - P0.getY())
+                    + 6 * oneMinusT * t * (P2.getY() - P1.getY())
+                    + 3 * Math.pow(t, 2) * (P3.getY() - P2.getY());
+
+            double headingRadians = Math.atan2(dy, dx);
+            double headingDegrees = Math.toDegrees(headingRadians);
+
+            curvePoses.add(new Pose2d(x, y, Rotation2d.fromDegrees(headingDegrees)));
+        }
+        return curvePoses;
+    }
+    public static void followSplinePurePursuitWithSquID(
+            Pose2d currentPose,
+            List<Pose2d> path,
+            DrivetrainSquIDController squid,
+            CoaxialDrive drive
+    ) {
+        double lookaheadDistance = 6.0;
+
+        for (int i = 0; i < path.size(); i++) {
+            // 1. Find the closest point on the path
+            Pose2d closestPoint = path.get(0);
+            double closestDistance = Double.MAX_VALUE;
+            for (Pose2d point : path) {
+                double dist = currentPose.getTranslation().getDistance(point.getTranslation());
+                if (dist < closestDistance) {
+                    closestDistance = dist;
+                    closestPoint = point;
+                }
+            }
+
+            // 2. Find a lookahead point ahead of the closest one
+            Pose2d lookaheadPoint = path.get(path.size() - 1);  // default to last
+            for (Pose2d point : path) {
+                double dist = closestPoint.getTranslation().getDistance(point.getTranslation());
+                if (dist >= lookaheadDistance) {
+                    lookaheadPoint = point;
+                    break;
+                }
+            }
+
+            // 3. Use SquID to calculate the required movement vector
+            Pose2d movement = squid.calculate(lookaheadPoint, currentPose, new Pose2d(0, 0, new Rotation2d()));
+
+            // 4. Convert the movement vector into turning and driving commands
+            double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
+            angle = (angle + 360) % 360;
+
+            if (angle > 180) {
+                drive.turn(angle - 180);
+                drive.moveBackward();
+            } else {
+                drive.turn(angle);
+                drive.moveForward();
+            }
+
+            // 5. Update the estimated pose (if using odometry, replace this with actual update)
+            currentPose = currentPose.plus(new Transform2d(movement.getTranslation(), new Rotation2d()));
         }
     }
 }
