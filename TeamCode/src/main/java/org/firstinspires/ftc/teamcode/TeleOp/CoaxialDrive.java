@@ -180,7 +180,7 @@ public class CoaxialDrive {
         stop();
     }
 
-    public static List<Pose2d> generateCubicSplinePath(Pose2d startPose, List<Translation2d> interiorPoints, Pose2d endPose) {
+    public static List<Pose2d> makeCubicSpline(Pose2d startPose, List<Translation2d> interiorPoints, Pose2d endPose) {
         // Combine all points: start, interior, end
         List<Translation2d> points = new ArrayList<>();
         points.add(startPose.getTranslation());
@@ -327,7 +327,7 @@ public class CoaxialDrive {
             int numPoints
     ) {
         Vector2d P0 = new Vector2d(startPose.getX(), startPose.getY());
-        Vector2d P3 = new Vector2d(startPose.getX(), startPose.getY());
+        Vector2d P3 = new Vector2d(endPose.getX(), endPose.getY());
 
         Vector2d control1 = new Vector2d(
                 startControlDistance * Math.cos(Math.toRadians(startPose.getHeading())),
@@ -383,14 +383,12 @@ public class CoaxialDrive {
             int numPoints
     ) {
         Vector2d P0 = new Vector2d(startPose.getX(), startPose.getY());
-        Vector2d P3 = new Vector2d(startPose.getX(), startPose.getY());
+        Vector2d P3 = new Vector2d(endPose.getX(), endPose.getY());
 
-        Vector2d control1 = new Vector2d(controlPoint1.getX(), controlPoint1.getY());
+        Vector2d P1 = new Vector2d(controlPoint1.getX(), controlPoint1.getY());
 
-        Vector2d control2 = new Vector2d(controlPoint2.getX(), controlPoint2.getY());
+        Vector2d P2 = new Vector2d(controlPoint2.getX(), controlPoint2.getY());
 
-        Vector2d P1 = P0.plus(control1);
-        Vector2d P2 = P3.minus(control2);
 
         List<Pose2d> curvePoses = new ArrayList<>();
 
@@ -425,7 +423,7 @@ public class CoaxialDrive {
         }
         return curvePoses;
     }
-    public static void followSplinePurePursuitWithSquID(
+    public static void MoveSplinePurePursuitWithSquID(
             Pose2d currentPose,
             List<Pose2d> path,
             DrivetrainSquIDController squid,
