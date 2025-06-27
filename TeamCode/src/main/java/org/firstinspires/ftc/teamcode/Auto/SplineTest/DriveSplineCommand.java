@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.Auto.SplineTest;
 
 import android.util.Log;
 
@@ -6,10 +6,11 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
+
+import org.firstinspires.ftc.teamcode.Auto.Squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 
 public class DriveSplineCommand extends CommandBase {

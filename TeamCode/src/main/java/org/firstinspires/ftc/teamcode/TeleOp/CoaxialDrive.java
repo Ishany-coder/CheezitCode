@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import org.firstinspires.ftc.teamcode.Auto.DrivetrainSquIDController;
+import org.firstinspires.ftc.teamcode.Auto.Squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.RobotConstants;
 
 import java.util.ArrayList;
