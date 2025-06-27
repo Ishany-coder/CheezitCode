@@ -12,18 +12,15 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.arcrobotics.ftclib.geometry.Vector2d;
-import com.arcrobotics.ftclib.trajectory.Trajectory;
 import com.arcrobotics.ftclib.trajectory.TrajectoryConfig;
 import com.arcrobotics.ftclib.trajectory.TrajectoryGenerator;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.teamcode.Auto.DrivetrainSquIDController;
+import org.firstinspires.ftc.teamcode.RobotConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +28,11 @@ import java.util.List;
 //change the code so at certain points it can use 1 motor to turn and move the wheel simultaneously
 @Config
 public class CoaxialDrive {
-    public static double robotRadius = 10;
-    public static double maxVelocitySpline = 10;
-    public static double maxAccelSpline = 10;
-    public double ServoDegrees = 300;
-    public static double MotorSpeed = 1;
+    double ServoDegrees = RobotConstants.ServoDegrees;
+    public double MotorSpeed = RobotConstants.MotorSpeed;
+    public double maxVelocitySpline = RobotConstants.maxVelocitySpline;
+    public double maxAccelSpline = RobotConstants.maxAccelSpline;
+    public double robotRadius = RobotConstants.robotRadius;
     private Servo ServoPod1;
     private Servo ServoPod2;
     private Servo ServoPod3;
@@ -316,8 +313,22 @@ public class CoaxialDrive {
                 );
             }
         }
-        public void makeParabolicSpline(Pose2d currentPose, double obstacleRadius, Pose2d obstaclePos, double RobotToObstacle, double addedGapfromRobotToobs){
-
+        public void makeParabolicSpline(Pose2d currentPose, double obstacleRadius, Pose2d obstaclePos, double addedGapfromRobotToobs){
+            List<Pose2d> path = new ArrayList<>();
+            double lineLength = obstacleRadius + addedGapfromRobotToobs + robotRadius;
+            double SlopeOfLine = -(currentPose.getX() - obstaclePos.getX())/(currentPose.getY() - obstaclePos.getY());
+            double angle = Math.atan(SlopeOfLine);
+            double newX = Math.cos(angle) * lineLength;
+            double newY = Math.sin(angle) * lineLength;
+            Translation2d newPose = new Translation2d(newX, newY);
+            double slopeOfParab = (currentPose.getY() - newPose.getY()) / Math.pow((currentPose.getX() - newPose.getX()), 2);
+            for(double i = currentPose.getX(); i < newPose.getX(); i += 0.1){
+                double dx = i - newPose.getX();
+                double YofParab = slopeOfParab * Math.pow((currentPose.getX() - newPose.getX()), 2) + newPose.getY();
+                double dy = YofParab - newPose.getY();
+                double Heading = Math.toDegrees(Math.atan(dy/dx));
+                path.add(new Pose2d(i, YofParab, new Rotation2d(Heading)));
+            }
         }
         public static List<Pose2d> makeBezierWithHeading(
                 Pose2d startPose,
