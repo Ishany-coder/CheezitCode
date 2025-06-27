@@ -490,4 +490,44 @@ public class CoaxialDrive {
                 Log.i("UPDATING CURRENT POSE NEW: ", "X: " + currentPose.getX() + " Y: " + currentPose.getY() + " Heading: " + currentPose.getHeading());
             }
         }
+    public static List<Pose2d> generateHermiteCurve(
+            Pose2d start, Rotation2d startHeading, double startMag,
+            Pose2d end, Rotation2d endHeading, double endMag) {
+        int numPoints = 100; // Find 100 points along curve
+        List<Pose2d> path = new ArrayList<>();
+
+        // Tangent vectors
+        double m0x = Math.cos(startHeading.getRadians()) * startMag;
+        double m0y = Math.sin(startHeading.getRadians()) * startMag;
+        double m1x = Math.cos(endHeading.getRadians()) * endMag;
+        double m1y = Math.sin(endHeading.getRadians()) * endMag;
+
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints; // value from 0 to 1 along curve
+
+            double h00 = 2 * t * t * t - 3 * t * t + 1; // How much start to keep 0 full 1 none
+            double h10 = t * t * t - 2 * t * t + t; // start tangent slope grows and fades back at 1
+            double h01 = -2 * t * t * t + 3 * t * t; // How much end to keep 0 none 1 full
+            double h11 = t * t * t - t * t; // end tangent slope 0 and 1 is none peaks mid
+
+            // h00 * start.getX() how much start point x to use
+            // h10 * m0x how much start tangents x influences curve
+            // h01 * end.getX() how much end point x to use
+            // h11 * m1x how much end tangents x influences curve
+            double x = h00 * start.getX() + h10 * m0x + h01 * end.getX() + h11 * m1x;
+            double y = h00 * start.getY() + h10 * m0y + h01 * end.getY() + h11 * m1y;
+
+            // Derivative for heading
+            double dx = (6 * t * t - 6 * t) * start.getX() + (3 * t * t - 4 * t + 1) * m0x
+                    + (-6 * t * t + 6 * t) * end.getX() + (3 * t * t - 2 * t) * m1x;
+            double dy = (6 * t * t - 6 * t) * start.getY() + (3 * t * t - 4 * t + 1) * m0y
+                    + (-6 * t * t + 6 * t) * end.getY() + (3 * t * t - 2 * t) * m1y;
+
+            double heading = Math.atan2(dy, dx);
+
+            path.add(new Pose2d(x, y, new Rotation2d(heading)));
+        }
+
+        return path;
+    }
 }
