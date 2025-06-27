@@ -313,7 +313,7 @@ public class CoaxialDrive {
                 );
             }
         }
-        public void makeParabolicSpline(Pose2d currentPose, double obstacleRadius, Pose2d obstaclePos, double addedGapfromRobotToobs){
+        public List<Pose2d> makeParabolicSpline(Pose2d currentPose, double obstacleRadius, Pose2d obstaclePos, double addedGapfromRobotToobs){
             List<Pose2d> path = new ArrayList<>();
             double lineLength = obstacleRadius + addedGapfromRobotToobs + robotRadius;
             double SlopeOfLine = -(currentPose.getX() - obstaclePos.getX())/(currentPose.getY() - obstaclePos.getY());
@@ -329,6 +329,7 @@ public class CoaxialDrive {
                 double Heading = Math.toDegrees(Math.atan(dy/dx));
                 path.add(new Pose2d(i, YofParab, new Rotation2d(Heading)));
             }
+            return path;
         }
         public static List<Pose2d> makeBezierWithHeading(
                 Pose2d startPose,
