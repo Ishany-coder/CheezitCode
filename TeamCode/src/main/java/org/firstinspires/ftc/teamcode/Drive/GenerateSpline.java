@@ -361,5 +361,4 @@ public class GenerateSpline {
 
         return spline;
     }
-    // assume right front is encoder 1 and left front is encoder 2 and right back is encoder 3
 }

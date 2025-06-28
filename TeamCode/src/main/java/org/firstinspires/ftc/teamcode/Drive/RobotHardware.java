@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Drive;
 
+import static org.firstinspires.ftc.teamcode.RobotConstants.MotorSpeed;
+import static org.firstinspires.ftc.teamcode.RobotConstants.ServoDegrees;
+
 import android.util.Log;
 
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -8,7 +11,6 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
-import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -16,19 +18,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Auto.Squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.RobotConstants;
-
 import java.util.List;
 
 public class RobotHardware {
-    public double Encoder1PrevTicks = Double.NaN;
-    public double Encoder2PrevTicks = Double.NaN;
-    public double Encoder3PrevTicks = Double.NaN;
-    public double WheelRadius = RobotConstants.WheelRadius;
-    public double EncoderTicksPerRev = RobotConstants.EncoderTicksPerRev;
-    public double LeftAndRightEncoderDist = RobotConstants.LeftAndRightEncoderDist;
-    public double FrontEncoderOffset = RobotConstants.FrontEncoderOffset;
-    double ServoDegrees = RobotConstants.ServoDegrees;
-    public double MotorSpeed = RobotConstants.MotorSpeed;
     private Servo RightFrontServo;
     private Servo LeftFrontServo;
     private Servo RightBackServo;
@@ -38,6 +30,7 @@ public class RobotHardware {
     private DcMotorEx RightBackMotor; // Right Back
     private DcMotorEx LeftBackMotor; // Left Back
     private DrivetrainSquIDController squid;
+    private Odometery odo;
 
     public RobotHardware(HardwareMap hardwareMap) {
         squid = new DrivetrainSquIDController();
@@ -63,6 +56,7 @@ public class RobotHardware {
         LeftFrontServo = hardwareMap.get(Servo.class, "LeftFrontServo");
         RightBackServo = hardwareMap.get(Servo.class, "RightBackServo");
         LeftBackServo = hardwareMap.get(Servo.class, "LeftBackServo");
+        odo = new Odometery(RightFrontMotor, LeftFrontMotor, RightBackMotor, hardwareMap);
     }
 
     public void turn(double angle) {
@@ -134,29 +128,7 @@ public class RobotHardware {
         RightBackMotor.setPower(0);
         LeftBackMotor.setPower(0);
     }
-    public Pose2d updatePose(Pose2d currentPose){
-        if (Double.isNaN(Encoder1PrevTicks)) {
-            Encoder1PrevTicks = RightFrontMotor.getCurrentPosition();
-            Encoder2PrevTicks = LeftFrontMotor.getCurrentPosition();
-            Encoder3PrevTicks = RightBackMotor.getCurrentPosition();
-            return currentPose;
-        }
-        double DeltaEncoder1Ticks = RightFrontMotor.getCurrentPosition() - Encoder1PrevTicks;
-        double DeltaEncoder2Ticks = LeftFrontMotor.getCurrentPosition() - Encoder2PrevTicks;
-        double DeltaEncoder3Ticks = RightBackMotor.getCurrentPosition() - Encoder3PrevTicks;
-        double I = (2 * Math.PI * WheelRadius) / EncoderTicksPerRev;
-        double DeltaX = I * ((DeltaEncoder1Ticks + DeltaEncoder2Ticks) / 2);
-        double DeltaTheta = I * (((DeltaEncoder1Ticks - DeltaEncoder2Ticks) / LeftAndRightEncoderDist));
-        double DeltaY = I * (DeltaEncoder3Ticks - (FrontEncoderOffset * (DeltaEncoder2Ticks - DeltaEncoder1Ticks) / LeftAndRightEncoderDist));
-        double NewX = currentPose.getX() + DeltaX * Math.cos(DeltaTheta) - DeltaY * Math.sin(DeltaTheta); // Apply vector math to find new X
-        double NewY = currentPose.getY() + DeltaX * Math.sin(DeltaTheta) + DeltaY * Math.cos(DeltaTheta); // Apply vector math to find new Y
-        double NewTheta = currentPose.getHeading() + DeltaTheta; // Apply vector math to find new Theta
-        //Update prev encoder ticks
-        Encoder1PrevTicks = RightFrontMotor.getCurrentPosition();
-        Encoder2PrevTicks = LeftFrontMotor.getCurrentPosition();
-        Encoder3PrevTicks = RightBackMotor.getCurrentPosition();
-        return new Pose2d(NewX, NewY, new Rotation2d(NewTheta));
-    }
+
     public void moveLinearAndTurn(Pose2d targetPose){
         if (targetPose.getY() > 0) {
             //Move and turn everything forward maybe change sequential to parallel?
@@ -229,7 +201,7 @@ public class RobotHardware {
 
         while (true) {
             // 0. Update pose estimate
-            currentPose = updatePose(currentPose);
+            currentPose = odo.updatePose(currentPose);
             // 1. Find the closest point, starting from last closest index
             Pose2d closestPoint = path.get(lastClosestIndex);
             double closestDistance = Double.MAX_VALUE;
