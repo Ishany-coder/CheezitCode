@@ -20,6 +20,9 @@ import org.firstinspires.ftc.teamcode.RobotConstants;
 import java.util.List;
 
 public class RobotHardware {
+    public double Encoder1PrevTicks = Double.NaN;
+    public double Encoder2PrevTicks = Double.NaN;
+    public double Encoder3PrevTicks = Double.NaN;
     public double WheelRadius = RobotConstants.WheelRadius;
     public double EncoderTicksPerRev = RobotConstants.EncoderTicksPerRev;
     public double LeftAndRightEncoderDist = RobotConstants.LeftAndRightEncoderDist;
@@ -131,10 +134,16 @@ public class RobotHardware {
         RightBackMotor.setPower(0);
         LeftBackMotor.setPower(0);
     }
-    public Pose2d updatePose(Pose2d currentPose, double prevEncoder1Ticks, double prevEncoder2Ticks, double prevEncoder3Ticks){
-        double DeltaEncoder1Ticks = RightFrontMotor.getCurrentPosition() - prevEncoder1Ticks;
-        double DeltaEncoder2Ticks = LeftFrontMotor.getCurrentPosition() - prevEncoder2Ticks;
-        double DeltaEncoder3Ticks = RightBackMotor.getCurrentPosition() - prevEncoder3Ticks;
+    public Pose2d updatePose(Pose2d currentPose){
+        if (Double.isNaN(Encoder1PrevTicks)) {
+            Encoder1PrevTicks = RightFrontMotor.getCurrentPosition();
+            Encoder2PrevTicks = LeftFrontMotor.getCurrentPosition();
+            Encoder3PrevTicks = RightBackMotor.getCurrentPosition();
+            return currentPose;
+        }
+        double DeltaEncoder1Ticks = RightFrontMotor.getCurrentPosition() - Encoder1PrevTicks;
+        double DeltaEncoder2Ticks = LeftFrontMotor.getCurrentPosition() - Encoder2PrevTicks;
+        double DeltaEncoder3Ticks = RightBackMotor.getCurrentPosition() - Encoder3PrevTicks;
         double I = (2 * Math.PI * WheelRadius) / EncoderTicksPerRev;
         double DeltaX = I * ((DeltaEncoder1Ticks + DeltaEncoder2Ticks) / 2);
         double DeltaTheta = I * (((DeltaEncoder1Ticks - DeltaEncoder2Ticks) / LeftAndRightEncoderDist));
@@ -142,6 +151,10 @@ public class RobotHardware {
         double NewX = currentPose.getX() + DeltaX * Math.cos(DeltaTheta) - DeltaY * Math.sin(DeltaTheta); // Apply vector math to find new X
         double NewY = currentPose.getY() + DeltaX * Math.sin(DeltaTheta) + DeltaY * Math.cos(DeltaTheta); // Apply vector math to find new Y
         double NewTheta = currentPose.getHeading() + DeltaTheta; // Apply vector math to find new Theta
+        //Update prev encoder ticks
+        Encoder1PrevTicks = RightFrontMotor.getCurrentPosition();
+        Encoder2PrevTicks = LeftFrontMotor.getCurrentPosition();
+        Encoder3PrevTicks = RightBackMotor.getCurrentPosition();
         return new Pose2d(NewX, NewY, new Rotation2d(NewTheta));
     }
     public void moveLinearAndTurn(Pose2d targetPose){
@@ -202,7 +215,7 @@ public class RobotHardware {
             stop();
         }
     }
-    public static void MoveSplinePurePursuitWithSquID(
+    public void MoveSplinePurePursuitWithSquID(
             Pose2d currentPose,
             List<Pose2d> path,
             DrivetrainSquIDController squid,
@@ -215,6 +228,8 @@ public class RobotHardware {
         int lastClosestIndex = 0;
 
         while (true) {
+            // 0. Update pose estimate
+            currentPose = updatePose(currentPose);
             // 1. Find the closest point, starting from last closest index
             Pose2d closestPoint = path.get(lastClosestIndex);
             double closestDistance = Double.MAX_VALUE;
@@ -257,8 +272,6 @@ public class RobotHardware {
                 drive.moveForward();
             }
 
-            // 5. Update pose estimate
-            currentPose = currentPose.plus(new Transform2d(movement.getTranslation(), new Rotation2d()));
 
             // 6. Check if we're near the final point
             Pose2d finalPoint = path.get(path.size() - 1);
