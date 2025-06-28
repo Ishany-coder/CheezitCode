@@ -530,4 +530,51 @@ public class CoaxialDrive {
 
         return path;
     }
+    public static List<Pose2d> generateQuinticSpline(
+            Pose2d startPos,
+            Pose2d startVel,
+            Pose2d startAccel,
+            Pose2d endPos,
+            Pose2d endVel,
+            Pose2d endAccel
+    ) {
+        int numPoints = 100; //Generate 100 points
+        List<Pose2d> spline = new ArrayList<>();
+
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints;
+
+            double t2 = t * t;
+            double t3 = t2 * t;
+            double t4 = t3 * t;
+            double t5 = t4 * t;
+
+            // Quintic basis functions
+            double b0 = 1 - 10 * t3 + 15 * t4 - 6 * t5;
+            double b1 = t - 6 * t3 + 8 * t4 - 3 * t5;
+            double b2 = 0.5 * t2 - 1.5 * t3 + 1.5 * t4 - 0.5 * t5;
+            double b3 = 10 * t3 - 15 * t4 + 6 * t5;
+            double b4 = -4 * t3 + 7 * t4 - 3 * t5;
+            double b5 = 0.5 * t3 - t4 + 0.5 * t5;
+
+            // Position
+            double x = b0 * startPos.getX() + b1 * startVel.getX() + b2 * startAccel.getX()
+                    + b3 * endPos.getX() + b4 * endVel.getX() + b5 * endAccel.getX();
+
+            double y = b0 * startPos.getY() + b1 * startVel.getY() + b2 * startAccel.getY()
+                    + b3 * endPos.getY() + b4 * endVel.getY() + b5 * endAccel.getY();
+
+            // Estimate heading from dx/dy of blended vectors
+            double dx = b1 * startVel.getX() + b2 * startAccel.getX()
+                    + b4 * endVel.getX() + b5 * endAccel.getX();
+
+            double dy = b1 * startVel.getY() + b2 * startAccel.getY()
+                    + b4 * endVel.getY() + b5 * endAccel.getY();
+
+            double heading = Math.atan2(dy, dx);
+            spline.add(new Pose2d(x, y, new Rotation2d(heading)));
+        }
+
+        return spline;
+    }
 }
