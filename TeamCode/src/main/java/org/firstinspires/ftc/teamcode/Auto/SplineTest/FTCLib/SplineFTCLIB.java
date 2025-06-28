@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.SplineTest;
+package org.firstinspires.ftc.teamcode.Auto.SplineTest.FTCLib;
 
 import android.util.Log;
 

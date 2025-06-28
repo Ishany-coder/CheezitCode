@@ -28,70 +28,78 @@ import java.util.List;
 //change the code so at certain points it can use 1 motor to turn and move the wheel simultaneously
 @Config
 public class CoaxialDrive {
+    public double WheelRadius = RobotConstants.WheelRadius;
+    public double EncoderTicksPerRev = RobotConstants.EncoderTicksPerRev;
+    public double LeftAndRightEncoderDist = RobotConstants.LeftAndRightEncoderDist;
+    public double FrontEncoderOffset = RobotConstants.FrontEncoderOffset;
     double ServoDegrees = RobotConstants.ServoDegrees;
     public double MotorSpeed = RobotConstants.MotorSpeed;
     public double maxVelocitySpline = RobotConstants.maxVelocitySpline;
     public double maxAccelSpline = RobotConstants.maxAccelSpline;
     public double robotRadius = RobotConstants.robotRadius;
-    private Servo ServoPod1;
-    private Servo ServoPod2;
-    private Servo ServoPod3;
-    private Servo ServoPod4;
-    private DcMotorEx MotorPod1;
-    private DcMotorEx MotorPod2;
-    private DcMotorEx MotorPod3;
-    private DcMotorEx MotorPod4;
+    private Servo RightFrontServo;
+    private Servo LeftFrontServo;
+    private Servo RightBackServo;
+    private Servo LeftBackServo;
+    private DcMotorEx RightFrontMotor; // Right Front
+    private DcMotorEx LeftFrontMotor; // Left Front
+    private DcMotorEx RightBackMotor; // Right Back
+    private DcMotorEx LeftBackMotor; // Left Back
     private DrivetrainSquIDController squid;
 
     public CoaxialDrive(HardwareMap hardwareMap) {
         squid = new DrivetrainSquIDController();
         Log.i("DRIVE TRAIN STATUS: ", "INITIALIZED");
         //Initialize motors and their behaviors
-        MotorPod1 = hardwareMap.get(DcMotorEx.class, "MotorPod1");
-        MotorPod1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        MotorPod1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RightFrontMotor = hardwareMap.get(DcMotorEx.class, "RightFrontMotor");
+        RightFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        MotorPod2 = hardwareMap.get(DcMotorEx.class, "MotorPod2");
-        MotorPod2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        MotorPod2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LeftFrontMotor = hardwareMap.get(DcMotorEx.class, "LeftFrontMotor");
+        LeftFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LeftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        MotorPod3 = hardwareMap.get(DcMotorEx.class, "MotorPod3");
-        MotorPod3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        MotorPod3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RightBackMotor = hardwareMap.get(DcMotorEx.class, "RightBackMotor");
+        RightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        MotorPod4 = hardwareMap.get(DcMotorEx.class, "MotorPod4");
-        MotorPod4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        MotorPod4.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LeftBackMotor = hardwareMap.get(DcMotorEx.class, "LeftBackMotor");
+        LeftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LeftBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //Initialize servos
-        ServoPod1 = hardwareMap.get(Servo.class, "ServoPod1");
-        ServoPod2 = hardwareMap.get(Servo.class, "ServoPod2");
-        ServoPod3 = hardwareMap.get(Servo.class, "ServoPod3");
-        ServoPod4 = hardwareMap.get(Servo.class, "ServoPod4");
+        RightFrontServo = hardwareMap.get(Servo.class, "RightFrontServo");
+        LeftFrontServo = hardwareMap.get(Servo.class, "LeftFrontServo");
+        RightBackServo = hardwareMap.get(Servo.class, "RightBackServo");
+        LeftBackServo = hardwareMap.get(Servo.class, "LeftBackServo");
     }
     public void turn(double angle) {
         Log.i("TURNING SERVOS ", "ANGLE: " + angle);
         //Move Right
-        if(ServoPod1.getPosition()*ServoDegrees > angle){
+        if(RightFrontServo.getPosition()*ServoDegrees > angle){
             Log.i("TURNING SERVOS: ", "RIGHT");
+            RightFrontServo.setDirection(Servo.Direction.FORWARD);
+            LeftFrontServo.setDirection(Servo.Direction.FORWARD);
+            RightBackServo.setDirection(Servo.Direction.FORWARD);
+            LeftBackServo.setDirection(Servo.Direction.FORWARD);
             //Move Servos
-            ServoPod1.setPosition(angle/ServoDegrees);
-            ServoPod2.setPosition(angle/ServoDegrees);
-            ServoPod3.setPosition(angle/ServoDegrees);
-            ServoPod4.setPosition(angle/ServoDegrees);
+            RightFrontServo.setPosition(angle/ServoDegrees);
+            LeftFrontServo.setPosition(angle/ServoDegrees);
+            RightBackServo.setPosition(angle/ServoDegrees);
+            LeftBackServo.setPosition(angle/ServoDegrees);
         }
         //Move Left
-        else if(ServoPod1.getPosition() * ServoDegrees < angle){
+        else if(RightFrontServo.getPosition() * ServoDegrees < angle){
             Log.i("TURNING SERVOS: ", "LEFT");
             //Set the direction to reverse or left then move
-            ServoPod1.setDirection(Servo.Direction.REVERSE);
-            ServoPod2.setDirection(Servo.Direction.REVERSE);
-            ServoPod3.setDirection(Servo.Direction.REVERSE);
-            ServoPod4.setDirection(Servo.Direction.REVERSE);
+            RightFrontServo.setDirection(Servo.Direction.REVERSE);
+            LeftFrontServo.setDirection(Servo.Direction.REVERSE);
+            RightBackServo.setDirection(Servo.Direction.REVERSE);
+            LeftBackServo.setDirection(Servo.Direction.REVERSE);
             //Move Servos
-            ServoPod1.setPosition(angle/ServoDegrees);
-            ServoPod2.setPosition(angle/ServoDegrees);
-            ServoPod3.setPosition(angle/ServoDegrees);
-            ServoPod4.setPosition(angle/ServoDegrees);
+            RightFrontServo.setPosition(angle/ServoDegrees);
+            LeftFrontServo.setPosition(angle/ServoDegrees);
+            RightBackServo.setPosition(angle/ServoDegrees);
+            LeftBackServo.setPosition(angle/ServoDegrees);
         }
     }
 
@@ -104,32 +112,33 @@ public class CoaxialDrive {
 
     public void moveForward() {
         Log.i("MOVING ROBOT: ", "FORWARD");
+        if(MotorSpeed < 0){
+            MotorSpeed *= -1;
+        }
         //Move motors forward
-        MotorPod1.setPower(MotorSpeed);
-        MotorPod2.setPower(MotorSpeed);
-        MotorPod3.setPower(MotorSpeed);
-        MotorPod4.setPower(MotorSpeed);
+        RightFrontMotor.setPower(MotorSpeed);
+        LeftFrontMotor.setPower(MotorSpeed);
+        RightBackMotor.setPower(MotorSpeed);
+        LeftBackMotor.setPower(MotorSpeed);
     }
 
     public void moveBackward() {
         Log.i("MOVING ROBOT: ", "BACKWARD");
-        // move Backward
-        MotorPod1.setDirection(DcMotorSimple.Direction.REVERSE);
-        MotorPod2.setDirection(DcMotorSimple.Direction.REVERSE);
-        MotorPod3.setDirection(DcMotorSimple.Direction.REVERSE);
-        MotorPod4.setDirection(DcMotorSimple.Direction.REVERSE);
-        MotorPod1.setPower(MotorSpeed);
-        MotorPod2.setPower(MotorSpeed);
-        MotorPod3.setPower(MotorSpeed);
-        MotorPod4.setPower(MotorSpeed);
+        if(MotorSpeed > 0){
+            MotorSpeed *= -1;
+        }
+        RightFrontMotor.setPower(MotorSpeed);
+        LeftFrontMotor.setPower(MotorSpeed);
+        RightBackMotor.setPower(MotorSpeed);
+        LeftBackMotor.setPower(MotorSpeed);
     }
     public void stop(){
         Log.i("STATUS: ", "STOPPED");
         //Stop motors
-        MotorPod1.setPower(0);
-        MotorPod2.setPower(0);
-        MotorPod3.setPower(0);
-        MotorPod4.setPower(0);
+        RightFrontMotor.setPower(0);
+        LeftFrontMotor.setPower(0);
+        RightBackMotor.setPower(0);
+        LeftBackMotor.setPower(0);
     }
     //function to move robot linearly to a point
     public void MoveRobotLinear(Pose2d targetPose, Pose2d currentPose){
@@ -436,60 +445,73 @@ public class CoaxialDrive {
             }
             return curvePoses;
         }
-        public static void MoveSplinePurePursuitWithSquID(
-                Pose2d currentPose,
-                List<Pose2d> path,
-                DrivetrainSquIDController squid,
-                CoaxialDrive drive
-        ) {
-            Log.i("MOVING ROBOT: ", "PURSUIT MOVEMENT");
-            double lookaheadDistance = 6.0;
-            for (int i = 0; i < path.size(); i++) {
-                // 1. Find the closest point on the path
-                Pose2d closestPoint = path.get(0);
-                double closestDistance = Double.MAX_VALUE;
-                for (Pose2d point : path) {
-                    double dist = currentPose.getTranslation().getDistance(point.getTranslation());
-                    if (dist < closestDistance) {
-                        closestDistance = dist;
-                        closestPoint = point;
-                    }
-                }
-                Log.i("FOUND CLOSEST POINT: ", "X: " + closestPoint.getX() + " Y: " + closestPoint.getY() + " Heading: " + closestPoint.getHeading());
+    public static void MoveSplinePurePursuitWithSquID(
+            Pose2d currentPose,
+            List<Pose2d> path,
+            DrivetrainSquIDController squid,
+            CoaxialDrive drive
+    ) {
+        Log.i("MOVING ROBOT: ", "PURE PURSUIT STARTED");
+        double lookaheadDistance = 6.0;
+        double positionTolerance = 1.0;
 
-                // 2. Find a lookahead point ahead of the closest one
-                Pose2d lookaheadPoint = path.get(path.size() - 1);  // default to last
-                for (Pose2d point : path) {
-                    double dist = closestPoint.getTranslation().getDistance(point.getTranslation());
-                    if (dist >= lookaheadDistance) {
-                        lookaheadPoint = point;
-                        break;
-                    }
-                }
-                Log.i("FOUND LOOKAHEAD POINT: ", "X: " + lookaheadPoint.getX() + " Y: " + lookaheadPoint.getY() + " Heading: " + lookaheadPoint.getHeading());
-                // 3. Use SquID to calculate the required movement vector
-                Pose2d movement = squid.calculate(lookaheadPoint, currentPose, new Pose2d(0, 0, new Rotation2d()));
-                Log.i("CALCULATED MOVEMENT USING: ", "SQUID");
-                // 4. Convert the movement vector into turning and driving commands
-                double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
-                angle = (angle + 360) % 360;
-                Log.i("TURNING TO ANGLE: ", "ANGLE: " + angle);
-                if (angle > 180) {
-                    Log.i("ANGLE GREATER THAN: ", "180");
-                    drive.turn(angle - 180);
-                    drive.moveBackward();
-                } else {
-                    Log.i("ANGLE LESS THAN: ", "180");
-                    drive.turn(angle);
-                    drive.moveForward();
-                }
+        int lastClosestIndex = 0;
 
-                // 5. Update the estimated pose (if using odometry, replace this with actual update)
-                Log.i("UPDATING CURRENT POSE OLD: ", "X: " + currentPose.getX() + " Y: " + currentPose.getY() + " Heading: " + currentPose.getHeading());
-                currentPose = currentPose.plus(new Transform2d(movement.getTranslation(), new Rotation2d()));
-                Log.i("UPDATING CURRENT POSE NEW: ", "X: " + currentPose.getX() + " Y: " + currentPose.getY() + " Heading: " + currentPose.getHeading());
+        while (true) {
+            // 1. Find the closest point, starting from last closest index
+            Pose2d closestPoint = path.get(lastClosestIndex);
+            double closestDistance = Double.MAX_VALUE;
+
+            for (int i = lastClosestIndex; i < path.size(); i++) {
+                double dist = currentPose.getTranslation().getDistance(path.get(i).getTranslation());
+                if (dist < closestDistance) {
+                    closestDistance = dist;
+                    closestPoint = path.get(i);
+                    lastClosestIndex = i;
+                }
+            }
+
+            Log.i("CLOSEST POINT:", "X: " + closestPoint.getX() + " Y: " + closestPoint.getY());
+
+            // 2. Find lookahead point at distance from current pose
+            Pose2d lookaheadPoint = path.get(path.size() - 1); // default to final
+            for (int i = lastClosestIndex; i < path.size(); i++) {
+                double dist = currentPose.getTranslation().getDistance(path.get(i).getTranslation());
+                if (dist >= lookaheadDistance) {
+                    lookaheadPoint = path.get(i);
+                    break;
+                }
+            }
+
+            Log.i("LOOKAHEAD POINT:", "X: " + lookaheadPoint.getX() + " Y: " + lookaheadPoint.getY());
+
+            // 3. Calculate movement using SquID
+            Pose2d movement = squid.calculate(lookaheadPoint, currentPose, lookaheadPoint);  // use full pose target
+
+            // 4. Determine angle
+            double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
+            angle = (angle + 360) % 360;
+
+            if (angle > 180) {
+                drive.turn(angle - 180);
+                drive.moveBackward();
+            } else {
+                drive.turn(angle);
+                drive.moveForward();
+            }
+
+            // 5. Update pose estimate
+            currentPose = currentPose.plus(new Transform2d(movement.getTranslation(), new Rotation2d()));
+
+            // 6. Check if we're near the final point
+            Pose2d finalPoint = path.get(path.size() - 1);
+            if (currentPose.getTranslation().getDistance(finalPoint.getTranslation()) < positionTolerance) {
+                Log.i("PURE PURSUIT: ", "REACHED FINAL POINT");
+                drive.stop();
+                break;
             }
         }
+    }
     public static List<Pose2d> generateHermiteCurve(
             Pose2d start, Rotation2d startHeading, double startMag,
             Pose2d end, Rotation2d endHeading, double endMag) {
@@ -531,12 +553,12 @@ public class CoaxialDrive {
         return path;
     }
     public static List<Pose2d> generateQuinticSpline(
-            Pose2d startPos,
-            Pose2d startVel,
-            Pose2d startAccel,
-            Pose2d endPos,
-            Pose2d endVel,
-            Pose2d endAccel
+            Pose2d startPos, // x y pos
+            Pose2d startVel, // x and y vel
+            Pose2d startAccel, // x and y accel
+            Pose2d endPos, // x y pos
+            Pose2d endVel, // x and y vel
+            Pose2d endAccel // x and y accel
     ) {
         int numPoints = 100; //Generate 100 points
         List<Pose2d> spline = new ArrayList<>();
@@ -576,5 +598,19 @@ public class CoaxialDrive {
         }
 
         return spline;
+    }
+    // assume right front is encoder 1 and left front is encoder 2 and right back is encoder 3
+    public Pose2d updatePose(Pose2d currentPose, double prevEncoder1Ticks, double prevEncoder2Ticks, double prevEncoder3Ticks){
+        double DeltaEncoder1Ticks = RightFrontMotor.getCurrentPosition() - prevEncoder1Ticks;
+        double DeltaEncoder2Ticks = LeftFrontMotor.getCurrentPosition() - prevEncoder2Ticks;
+        double DeltaEncoder3Ticks = RightBackMotor.getCurrentPosition() - prevEncoder3Ticks;
+        double I = (2 * Math.PI * WheelRadius) / EncoderTicksPerRev;
+        double DeltaX = I * ((DeltaEncoder1Ticks + DeltaEncoder2Ticks) / 2);
+        double DeltaTheta = I * (((DeltaEncoder1Ticks - DeltaEncoder2Ticks) / LeftAndRightEncoderDist));
+        double DeltaY = I * (DeltaEncoder3Ticks - (FrontEncoderOffset * (DeltaEncoder2Ticks - DeltaEncoder1Ticks) / LeftAndRightEncoderDist));
+        double NewX = currentPose.getX() + DeltaX * Math.cos(DeltaTheta) - DeltaY * Math.sin(DeltaTheta); // Apply vector math to find new X
+        double NewY = currentPose.getY() + DeltaX * Math.sin(DeltaTheta) + DeltaY * Math.cos(DeltaTheta); // Apply vector math to find new Y
+        double NewTheta = currentPose.getHeading() + DeltaTheta; // Apply vector math to find new Theta
+        return new Pose2d(NewX, NewY, new Rotation2d(NewTheta));
     }
 }

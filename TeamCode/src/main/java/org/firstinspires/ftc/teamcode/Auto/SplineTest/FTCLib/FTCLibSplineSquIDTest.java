@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.SplineTest;
+package org.firstinspires.ftc.teamcode.Auto.SplineTest.FTCLib;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.Auto.SplineTest.Custom.DriveSplineCommand;
 import org.firstinspires.ftc.teamcode.Auto.Squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 

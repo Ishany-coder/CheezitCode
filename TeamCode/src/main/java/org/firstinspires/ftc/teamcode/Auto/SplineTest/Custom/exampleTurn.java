@@ -1,16 +1,17 @@
-package org.firstinspires.ftc.teamcode.Auto.SplineTest;
+package org.firstinspires.ftc.teamcode.Auto.SplineTest.Custom;
+
+import android.util.Log;
 
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 
-// This is an example file using Squid that takes the robot from its starting position to the point (24,0)
-// it continously updates its position and stops when it reaches within 1 inch of the target position
-@Autonomous(name="Cheezits Auto SquID", group="Cheezits")
-public class ExampleLinearMovement extends LinearOpMode {
+@Autonomous(name="Cheezits Turn Test", group="Cheezits")
+public class exampleTurn extends LinearOpMode {
+
     private CoaxialDrive myHardware;
     private Pose2d currentPose;
     private Pose2d targetPose;
@@ -25,15 +26,16 @@ public class ExampleLinearMovement extends LinearOpMode {
 
         waitForStart(); // Wait for the start signal
 
-        // Set starting position and target position
-        currentPose = new Pose2d(0, 0, new Rotation2d(0)); // Start at (0,0)
-        targetPose = new Pose2d(24, 0, new Rotation2d(0)); // Move to (24,0)
-
-        ElapsedTime runtime = new ElapsedTime();
+        // Set start pose (at 0 degrees) and target pose (90-degree rotation)
+        currentPose = new Pose2d(0, 0, new Rotation2d(0)); // Facing forward
+        targetPose = new Pose2d(0, 0, new Rotation2d(Math.toRadians(90))); // Rotate to 90 degrees
 
         while (opModeIsActive()) {
-            // Calculate movement using SquIDController
             myHardware.MoveRobotLinear(targetPose, currentPose);
+            Log.i("MOVING ROBOT ", "TO TARGET ROTATION: " + Math.toDegrees(targetPose.getRotation().getRadians()));
+            Log.i("MOVING ROBOT ", "AT CURRENT ROTATION: " + Math.toDegrees(currentPose.getRotation().getRadians()));
         }
+
+        myHardware.stop(); // Stop servos after turning
     }
 }
