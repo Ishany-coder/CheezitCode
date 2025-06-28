@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode.Test;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.ejml.equation.IntegerSequence;
-import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 
 /*
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -26,7 +23,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.CoaxialDrive;
 @Config
 @TeleOp(name="ServoTest", group="Linear OpMode")
 public class ServoControlTest extends LinearOpMode {
-    CoaxialDrive myHardware;
 
     // Declare OpMode members.
     public static double ServoPosition = 0;
