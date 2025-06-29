@@ -8,14 +8,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.Drive.GenerateSpline;
-import org.firstinspires.ftc.teamcode.Drive.RobotHardware;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous
 public class customSplineMovementBezier extends LinearOpMode {
-    public RobotHardware drive;
+    public CoaxialDrive drive;
     public GenerateSpline spline;
     public DrivetrainSquIDController squid;
     private List<Pose2d> path;
@@ -25,13 +24,13 @@ public class customSplineMovementBezier extends LinearOpMode {
     private Pose2d endPose = new Pose2d(10,10, new Rotation2d(0));
     @Override
     public void runOpMode() throws InterruptedException {
-        drive = new RobotHardware(hardwareMap);
+        drive = new CoaxialDrive(hardwareMap);
         spline = new GenerateSpline();
         squid = new DrivetrainSquIDController();
         waitForStart();
         while(opModeIsActive()){
             path = spline.makeBezierWithHeadingV2(startPose, endPose, control1, control2); // get a list of points in path
-            drive.MoveSpline(startPose, path, squid);
+            drive.MoveSpline(path);
         }
     }
 }

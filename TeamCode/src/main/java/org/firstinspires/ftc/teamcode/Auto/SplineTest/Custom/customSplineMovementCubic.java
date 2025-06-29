@@ -8,14 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.Drive.GenerateSpline;
-import org.firstinspires.ftc.teamcode.Drive.RobotHardware;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous
 public class customSplineMovementCubic extends LinearOpMode {
-    public RobotHardware drive;
+    public CoaxialDrive drive;
     public GenerateSpline spline;
     public DrivetrainSquIDController squid;
     private List<Pose2d> path;
@@ -24,14 +24,14 @@ public class customSplineMovementCubic extends LinearOpMode {
     private Pose2d endPose = new Pose2d(10,10, new Rotation2d(0));
     @Override
     public void runOpMode() throws InterruptedException {
-        drive = new RobotHardware(hardwareMap);
+        drive = new CoaxialDrive(hardwareMap);
         spline = new GenerateSpline();
         squid = new DrivetrainSquIDController();
         midPoints.add(new Translation2d(5, 5)); // Make midpoints with 5,5
         waitForStart();
         while(opModeIsActive()){
             path = spline.makeCubicSpline(startPose, midPoints, endPose); // get a list of points in path
-            drive.MoveSpline(startPose, path, squid);
+            drive.MoveSpline(path);
         }
     }
 }

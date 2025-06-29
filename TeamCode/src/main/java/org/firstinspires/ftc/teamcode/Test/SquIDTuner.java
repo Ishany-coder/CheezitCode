@@ -10,7 +10,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 
 import org.firstinspires.ftc.teamcode.Controller.squid.SquIDController;
-import org.firstinspires.ftc.teamcode.Drive.RobotHardware;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
 @Config
 @TeleOp(name="cheezitsSwerve", group="CheezitsTeleOp")
 public class SquIDTuner extends LinearOpMode {
@@ -18,13 +18,13 @@ public class SquIDTuner extends LinearOpMode {
     private SquIDController squid; // Custom PID controller for movement adjustments
     public static double looptimeAdjuster = 15;
 
-    private RobotHardware drive;
+    private CoaxialDrive drive;
     private Pose2d currentPose, targetPose;
     private ElapsedTime timer;
 
     @Override
     public void runOpMode() {
-        drive = new RobotHardware(this.hardwareMap);
+        drive = new CoaxialDrive(this.hardwareMap);
         timer = new ElapsedTime();
 
         currentPose = new Pose2d(0, 0, new Rotation2d(0));

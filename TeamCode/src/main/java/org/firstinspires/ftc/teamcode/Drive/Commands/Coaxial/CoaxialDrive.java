@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Drive;
+package org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial;
 
 import static org.firstinspires.ftc.teamcode.RobotConstants.MotorSpeed;
 import static org.firstinspires.ftc.teamcode.RobotConstants.ServoDegrees;
@@ -9,6 +9,7 @@ import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,11 +17,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Controller.PurePursuit.PurePursuitController;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
+import org.firstinspires.ftc.teamcode.Drive.Odometery;
 
 import java.util.List;
 
-public class RobotHardware {
+public class CoaxialDrive extends SubsystemBase {
     private Servo RightFrontServo;
     private Servo LeftFrontServo;
     private Servo RightBackServo;
@@ -32,7 +35,7 @@ public class RobotHardware {
     private DrivetrainSquIDController squid;
     private Odometery odo;
 
-    public RobotHardware(HardwareMap hardwareMap) {
+    public CoaxialDrive(HardwareMap hardwareMap) {
         squid = new DrivetrainSquIDController();
         Log.i("DRIVE TRAIN STATUS: ", "INITIALIZED");
         //Initialize motors and their behaviors
@@ -188,53 +191,31 @@ public class RobotHardware {
         }
     }
     public void MoveSpline(
-            Pose2d startPose,
-            List<Pose2d> path,
-            DrivetrainSquIDController squid
+            List<Pose2d> path
     ) {
-        Log.i("MOVING ROBOT: ", "PURE PURSUIT STARTED");
-        double lookaheadDistance = 6.0;
-        double positionTolerance = 1.0;
+        Pose2d startPose = path.get(0);
+        Log.i("MOVING ROBOT", "PURE PURSUIT STARTED");
 
-        int lastClosestIndex = 0;
+        PurePursuitController controller = new PurePursuitController(6.0);
+        double positionTolerance = 1.0;
 
         while (true) {
             // 0. Update pose estimate
             startPose = odo.updatePose(startPose);
-            // 1. Find the closest point, starting from last closest index
-            Pose2d closestPoint = path.get(lastClosestIndex);
-            double closestDistance = Double.MAX_VALUE;
 
-            for (int i = lastClosestIndex; i < path.size(); i++) {
-                double dist = startPose.getTranslation().getDistance(path.get(i).getTranslation());
-                if (dist < closestDistance) {
-                    closestDistance = dist;
-                    closestPoint = path.get(i);
-                    lastClosestIndex = i;
-                }
-            }
+            // 1. Get lookahead point
+            Pose2d lookahead = controller.getLookaheadPoint(path, startPose);
 
-            Log.i("CLOSEST POINT:", "X: " + closestPoint.getX() + " Y: " + closestPoint.getY());
+            Log.i("LOOKAHEAD POINT", "X: " + lookahead.getX() + " Y: " + lookahead.getY());
 
-            // 2. Find lookahead point at distance from current pose
-            Pose2d lookaheadPoint = path.get(path.size() - 1); // default to final
-            for (int i = lastClosestIndex; i < path.size(); i++) {
-                double dist = startPose.getTranslation().getDistance(path.get(i).getTranslation());
-                if (dist >= lookaheadDistance) {
-                    lookaheadPoint = path.get(i);
-                    break;
-                }
-            }
+            // 2. Use SquID to compute motion vector toward lookahead
+            Pose2d movement = squid.calculate(lookahead, startPose, lookahead);
 
-            Log.i("LOOKAHEAD POINT:", "X: " + lookaheadPoint.getX() + " Y: " + lookaheadPoint.getY());
-
-            // 3. Calculate movement using SquID
-            Pose2d movement = squid.calculate(lookaheadPoint, startPose, lookaheadPoint);  // use full pose target
-
-            // 4. Determine angle
+            // 3. Extract heading from movement vector
             double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
             angle = (angle + 360) % 360;
 
+            // 4. Move based on heading
             if (angle > 180) {
                 turn(angle - 180);
                 moveBackward();
@@ -243,14 +224,21 @@ public class RobotHardware {
                 moveForward();
             }
 
-
-            // 6. Check if we're near the final point
-            Pose2d finalPoint = path.get(path.size() - 1);
-            if (startPose.getTranslation().getDistance(finalPoint.getTranslation()) < positionTolerance) {
-                Log.i("PURE PURSUIT: ", "REACHED FINAL POINT");
+            // 5. Stop if close to final goal
+            if (controller.isFinished(path, startPose, positionTolerance)) {
+                Log.i("PURE PURSUIT", "REACHED FINAL POINT");
                 stop();
                 break;
             }
+        }
+    }
+    public void Strafe(boolean Right){
+        turn(90);
+        if(Right){
+            moveForward();
+        }
+        else{
+            moveBackward();
         }
     }
 }

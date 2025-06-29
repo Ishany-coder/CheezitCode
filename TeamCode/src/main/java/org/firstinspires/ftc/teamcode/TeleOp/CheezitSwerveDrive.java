@@ -9,7 +9,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Drive.RobotHardware;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
 
 
 @TeleOp(name="cheezitsSwerve", group="CheezitsTeleOp")
@@ -18,11 +18,11 @@ public class CheezitSwerveDrive extends LinearOpMode {
     private double xpos;
     private double ypos;
     private double Angle;
-    RobotHardware myHardware;
+    CoaxialDrive myHardware;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        myHardware = new RobotHardware(this.hardwareMap);
+        myHardware = new CoaxialDrive(this.hardwareMap);
 
         while (opModeIsActive()) {
             // Read gamepad input

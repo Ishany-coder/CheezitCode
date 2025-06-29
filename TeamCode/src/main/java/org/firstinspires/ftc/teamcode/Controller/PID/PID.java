@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.Controller.PID;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Config
 public class PID {
     private double kP, kI, kD;
     private double errorSum = 0;
