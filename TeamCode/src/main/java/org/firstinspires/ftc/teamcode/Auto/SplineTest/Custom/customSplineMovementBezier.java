@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.SplineCommand;
 import org.firstinspires.ftc.teamcode.Drive.GenerateSpline;
 import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
 
@@ -30,7 +31,7 @@ public class customSplineMovementBezier extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()){
             path = spline.makeBezierWithHeadingV2(startPose, endPose, control1, control2); // get a list of points in path
-            drive.MoveSpline(path);
+            new SplineCommand(drive, path);
         }
     }
 }

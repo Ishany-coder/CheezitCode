@@ -9,7 +9,10 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.BackwardCommand;
 import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.ForwardCommand;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.TurnCommand;
 
 
 @TeleOp(name="cheezitsSwerve", group="CheezitsTeleOp")
@@ -18,11 +21,11 @@ public class CheezitSwerveDrive extends LinearOpMode {
     private double xpos;
     private double ypos;
     private double Angle;
-    CoaxialDrive myHardware;
+    CoaxialDrive drive;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        myHardware = new CoaxialDrive(this.hardwareMap);
+        drive = new CoaxialDrive(this.hardwareMap);
 
         while (opModeIsActive()) {
             // Read gamepad input
@@ -31,7 +34,7 @@ public class CheezitSwerveDrive extends LinearOpMode {
             ypos = -gamepad1.right_stick_y;
 
             // Calculate servo position for turning
-            Angle = myHardware.getAngle(ypos, xpos);
+            Angle = drive.getAngle(ypos, xpos);
 
             // Schedule turning the wheels first, then moving forward
             try {
@@ -39,16 +42,16 @@ public class CheezitSwerveDrive extends LinearOpMode {
                     Log.i("CHEEZITS MOVING ROBOT: ", " FORWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new SequentialCommandGroup(
-                                    new InstantCommand(() -> myHardware.turn(Angle)), // Turn wheels
-                                    new InstantCommand(() -> myHardware.moveForward()) // Move forward
+                                    new TurnCommand(drive, Angle), // Turn wheels
+                                    new ForwardCommand(drive)// Move forward
                             )
                     );
                 } else if (ypos < 0) {
                     Log.i("CHEEZITS MOVING ROBOT: ", "BACKWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new SequentialCommandGroup(
-                                    new InstantCommand(() -> myHardware.turn(Angle)),
-                                    new InstantCommand(() -> myHardware.moveBackward())
+                                    new TurnCommand(drive, Angle),
+                                    new BackwardCommand(drive)
                             )
                     );
                 }
@@ -57,8 +60,8 @@ public class CheezitSwerveDrive extends LinearOpMode {
                     Log.i("CHEEZITS MOVING ROBOT: ", "TURNING FORWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new ParallelCommandGroup(
-                                    new InstantCommand(() -> myHardware.turn(Angle)),
-                                    new InstantCommand(() -> myHardware.moveForward())
+                                    new TurnCommand(drive, Angle),
+                                    new ForwardCommand(drive)
                             )
                     );
                 }
@@ -66,8 +69,8 @@ public class CheezitSwerveDrive extends LinearOpMode {
                     Log.i("CHEEZITS MOVING ROBOT: ", "TURNING BACKWARD SERVO ANGLE: " + Angle);
                     CommandScheduler.getInstance().schedule(
                             new ParallelCommandGroup(
-                                    new InstantCommand(() -> myHardware.turn(Angle)),
-                                    new InstantCommand(() -> myHardware.moveBackward())
+                                    new TurnCommand(drive, Angle),
+                                    new BackwardCommand(drive)
                             )
                     );
                 }

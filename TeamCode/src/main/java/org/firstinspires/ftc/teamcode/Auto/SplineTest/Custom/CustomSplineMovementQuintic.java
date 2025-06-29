@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import java.util.List;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
+import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.SplineCommand;
 import org.firstinspires.ftc.teamcode.Drive.GenerateSpline;
 import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
 
@@ -29,7 +30,7 @@ public class CustomSplineMovementQuintic extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()){
             List<Pose2d> path = spline.generateQuinticSpline(startPose, startVel, startaccel ,endPose, endVel, endaccel);
-            drive.MoveSpline(path);
+            new SplineCommand(drive, path);
         }
     }
 }
