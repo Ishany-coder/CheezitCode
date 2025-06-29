@@ -224,13 +224,13 @@ public class GenerateSpline {
         }
         return curvePoses;
     }
-    public static List<Pose2d> makeBezierWithHeadingV2(
+    public List<Pose2d> makeBezierWithHeadingV2(
             Pose2d startPose,
             Pose2d endPose,
-            Pose2d controlPoint1,
-            Pose2d controlPoint2,
-            int numPoints
+            Translation2d controlPoint1,
+            Translation2d controlPoint2
     ) {
+        int numPoints = 20; //get 20 points
         Log.i("MOVING ROBOT: ", "BEZIER MOVEMENT");
         Vector2d P0 = new Vector2d(startPose.getX(), startPose.getY());
         Vector2d P3 = new Vector2d(endPose.getX(), endPose.getY());
@@ -275,16 +275,16 @@ public class GenerateSpline {
     }
 
     public static List<Pose2d> generateHermiteCurve(
-            Pose2d start, Rotation2d startHeading, double startMag,
-            Pose2d end, Rotation2d endHeading, double endMag) {
+            Pose2d start, double startMag,
+            Pose2d end, double endMag) {
         int numPoints = 100; // Find 100 points along curve
         List<Pose2d> path = new ArrayList<>();
 
         // Tangent vectors
-        double m0x = Math.cos(startHeading.getRadians()) * startMag;
-        double m0y = Math.sin(startHeading.getRadians()) * startMag;
-        double m1x = Math.cos(endHeading.getRadians()) * endMag;
-        double m1y = Math.sin(endHeading.getRadians()) * endMag;
+        double m0x = Math.cos(Math.toRadians(start.getHeading())) * startMag;
+        double m0y = Math.sin(Math.toRadians(start.getHeading())) * startMag;
+        double m1x = Math.cos(Math.toRadians(end.getHeading())) * endMag;
+        double m1y = Math.sin(Math.toRadians(end.getHeading())) * endMag;
 
         for (int i = 0; i <= numPoints; i++) {
             double t = (double) i / numPoints; // value from 0 to 1 along curve
@@ -316,11 +316,11 @@ public class GenerateSpline {
     }
     public static List<Pose2d> generateQuinticSpline(
             Pose2d startPos, // x y pos
-            Pose2d startVel, // x and y vel
-            Pose2d startAccel, // x and y accel
+            Translation2d startVel, // x and y vel
+            Translation2d startAccel, // x and y accel
             Pose2d endPos, // x y pos
-            Pose2d endVel, // x and y vel
-            Pose2d endAccel // x and y accel
+            Translation2d endVel, // x and y vel
+            Translation2d endAccel // x and y accel
     ) {
         int numPoints = 100; //Generate 100 points
         List<Pose2d> spline = new ArrayList<>();

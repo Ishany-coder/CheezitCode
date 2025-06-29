@@ -16,8 +16,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Auto.Squid.DrivetrainSquIDController;
-import org.firstinspires.ftc.teamcode.RobotConstants;
+import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
+
 import java.util.List;
 
 public class RobotHardware {
@@ -187,11 +187,10 @@ public class RobotHardware {
             stop();
         }
     }
-    public void MoveSplinePurePursuitWithSquID(
-            Pose2d currentPose,
+    public void MoveSpline(
+            Pose2d startPose,
             List<Pose2d> path,
-            DrivetrainSquIDController squid,
-            RobotHardware drive
+            DrivetrainSquIDController squid
     ) {
         Log.i("MOVING ROBOT: ", "PURE PURSUIT STARTED");
         double lookaheadDistance = 6.0;
@@ -201,13 +200,13 @@ public class RobotHardware {
 
         while (true) {
             // 0. Update pose estimate
-            currentPose = odo.updatePose(currentPose);
+            startPose = odo.updatePose(startPose);
             // 1. Find the closest point, starting from last closest index
             Pose2d closestPoint = path.get(lastClosestIndex);
             double closestDistance = Double.MAX_VALUE;
 
             for (int i = lastClosestIndex; i < path.size(); i++) {
-                double dist = currentPose.getTranslation().getDistance(path.get(i).getTranslation());
+                double dist = startPose.getTranslation().getDistance(path.get(i).getTranslation());
                 if (dist < closestDistance) {
                     closestDistance = dist;
                     closestPoint = path.get(i);
@@ -220,7 +219,7 @@ public class RobotHardware {
             // 2. Find lookahead point at distance from current pose
             Pose2d lookaheadPoint = path.get(path.size() - 1); // default to final
             for (int i = lastClosestIndex; i < path.size(); i++) {
-                double dist = currentPose.getTranslation().getDistance(path.get(i).getTranslation());
+                double dist = startPose.getTranslation().getDistance(path.get(i).getTranslation());
                 if (dist >= lookaheadDistance) {
                     lookaheadPoint = path.get(i);
                     break;
@@ -230,26 +229,26 @@ public class RobotHardware {
             Log.i("LOOKAHEAD POINT:", "X: " + lookaheadPoint.getX() + " Y: " + lookaheadPoint.getY());
 
             // 3. Calculate movement using SquID
-            Pose2d movement = squid.calculate(lookaheadPoint, currentPose, lookaheadPoint);  // use full pose target
+            Pose2d movement = squid.calculate(lookaheadPoint, startPose, lookaheadPoint);  // use full pose target
 
             // 4. Determine angle
             double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
             angle = (angle + 360) % 360;
 
             if (angle > 180) {
-                drive.turn(angle - 180);
-                drive.moveBackward();
+                turn(angle - 180);
+                moveBackward();
             } else {
-                drive.turn(angle);
-                drive.moveForward();
+                turn(angle);
+                moveForward();
             }
 
 
             // 6. Check if we're near the final point
             Pose2d finalPoint = path.get(path.size() - 1);
-            if (currentPose.getTranslation().getDistance(finalPoint.getTranslation()) < positionTolerance) {
+            if (startPose.getTranslation().getDistance(finalPoint.getTranslation()) < positionTolerance) {
                 Log.i("PURE PURSUIT: ", "REACHED FINAL POINT");
-                drive.stop();
+                stop();
                 break;
             }
         }

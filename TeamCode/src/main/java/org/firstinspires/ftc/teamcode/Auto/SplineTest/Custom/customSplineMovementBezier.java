@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous
-public class customSplineMovementCubic extends LinearOpMode {
+public class customSplineMovementBezier extends LinearOpMode {
     public RobotHardware drive;
     public GenerateSpline spline;
     public DrivetrainSquIDController squid;
     private List<Pose2d> path;
-    private List<Translation2d> midPoints = new ArrayList<>();
+    private Translation2d control1 = new Translation2d(5, 5);
+    private Translation2d control2 = new Translation2d(5, 5);
     private Pose2d startPose = new Pose2d(0, 0, new Rotation2d(0));
     private Pose2d endPose = new Pose2d(10,10, new Rotation2d(0));
     @Override
@@ -27,10 +28,9 @@ public class customSplineMovementCubic extends LinearOpMode {
         drive = new RobotHardware(hardwareMap);
         spline = new GenerateSpline();
         squid = new DrivetrainSquIDController();
-        midPoints.add(new Translation2d(5, 5)); // Make midpoints with 5,5
         waitForStart();
         while(opModeIsActive()){
-            path = spline.makeCubicSpline(startPose, midPoints, endPose); // get a list of points in path
+            path = spline.makeBezierWithHeadingV2(startPose, endPose, control1, control2); // get a list of points in path
             drive.MoveSpline(startPose, path, squid);
         }
     }

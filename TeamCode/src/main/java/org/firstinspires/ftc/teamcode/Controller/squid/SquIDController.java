@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.Squid;
+package org.firstinspires.ftc.teamcode.Controller.squid;
 
 public class SquIDController {
     double p,i,d;
