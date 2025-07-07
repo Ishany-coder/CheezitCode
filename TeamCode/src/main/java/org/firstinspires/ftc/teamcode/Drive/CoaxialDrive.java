@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial;
+package org.firstinspires.ftc.teamcode.Drive;
 
 import static org.firstinspires.ftc.teamcode.RobotConstants.MotorSpeed;
 import static org.firstinspires.ftc.teamcode.RobotConstants.ServoDegrees;
@@ -17,11 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Controller.PurePursuit.PurePursuitController;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
-import org.firstinspires.ftc.teamcode.Drive.Odometery;
-
-import java.util.List;
 
 public class CoaxialDrive extends SubsystemBase {
     private Servo RightFrontServo;
@@ -190,48 +186,56 @@ public class CoaxialDrive extends SubsystemBase {
             stop();
         }
     }
-    public void MoveSpline(
-            List<Pose2d> path
-    ) {
-        Pose2d startPose = path.get(0);
-        Log.i("MOVING ROBOT", "PURE PURSUIT STARTED");
+    // also take into acount if there is any error from the first element of the path what to do
+    // Diff veloc for diff splines dis for bezier
+//    public void MoveSplineBezier(
+//            List<Pose2d> path
+//    ) {
+//        Pose2d startPose = path.get(0);
+//        Log.i("MOVING ROBOT", "PURE PURSUIT STARTED");
+//
+//        PurePursuitController controller = new PurePursuitController(6.0);
+//        double positionTolerance = 1.0;
+//
+//        while () {
+//            // 0. Update pose estimate
+//            Pose2d oldStartPose = path.get(0);
+//            startPose = odo.updatePose(startPose);
+//            // check if the start pose has changed
+//            if(oldStartPose.getX() - startPose.getX() > 1 || oldStartPose.getY() - startPose.getY() > 1){
+//
+//            }
+//            // 1. Get lookahead point
+//            Pose2d lookahead = controller.getLookaheadPoint(path, startPose);
+//
+//            Log.i("LOOKAHEAD POINT", "X: " + lookahead.getX() + " Y: " + lookahead.getY());
+//
+//            // 2. Use SquID to compute motion vector toward lookahead
+//            Pose2d movement = squid.calculate(lookahead, startPose, lookahead);
+//
+//            // 3. Extract heading from movement vector
+//            double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
+//            angle = (angle + 360) % 360;
+//
+//            // 4. Move based on heading
+//            if (angle > 180) {
+//                turn(angle - 180);
+//                moveBackward();
+//            } else {
+//                turn(angle);
+//                moveForward();
+//            }
+//
+//            // 5. Stop if close to final goal
+//            if (controller.isFinished(path, startPose, positionTolerance)) {
+//                Log.i("PURE PURSUIT", "REACHED FINAL POINT");
+//                stop();
+//                break;
+//            }
+//        }
+//    }
+    //calculate vel later js use var for now
 
-        PurePursuitController controller = new PurePursuitController(6.0);
-        double positionTolerance = 1.0;
-
-        while (true) {
-            // 0. Update pose estimate
-            startPose = odo.updatePose(startPose);
-
-            // 1. Get lookahead point
-            Pose2d lookahead = controller.getLookaheadPoint(path, startPose);
-
-            Log.i("LOOKAHEAD POINT", "X: " + lookahead.getX() + " Y: " + lookahead.getY());
-
-            // 2. Use SquID to compute motion vector toward lookahead
-            Pose2d movement = squid.calculate(lookahead, startPose, lookahead);
-
-            // 3. Extract heading from movement vector
-            double angle = Math.toDegrees(Math.atan2(movement.getY(), movement.getX()));
-            angle = (angle + 360) % 360;
-
-            // 4. Move based on heading
-            if (angle > 180) {
-                turn(angle - 180);
-                moveBackward();
-            } else {
-                turn(angle);
-                moveForward();
-            }
-
-            // 5. Stop if close to final goal
-            if (controller.isFinished(path, startPose, positionTolerance)) {
-                Log.i("PURE PURSUIT", "REACHED FINAL POINT");
-                stop();
-                break;
-            }
-        }
-    }
     public void Strafe(boolean Right){
         turn(90);
         if(Right){

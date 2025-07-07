@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.Drive.Commands.Mecanum;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.drivebase.MecanumDrive;
+
+import org.firstinspires.ftc.teamcode.Drive.MecanumDriveSubsystem;
 
 public class StrafeCommand extends InstantCommand {
 

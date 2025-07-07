@@ -9,7 +9,7 @@ import java.util.List;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.SplineCommand;
 import org.firstinspires.ftc.teamcode.Drive.GenerateSpline;
-import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
+import org.firstinspires.ftc.teamcode.Drive.CoaxialDrive;
 
 @Autonomous
 public class CustomSplineMovementQuintic extends LinearOpMode {

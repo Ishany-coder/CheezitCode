@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Test;
+package org.firstinspires.ftc.teamcode.Auto.Tuner;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.geometry.Transform2d;
@@ -10,7 +10,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 
 import org.firstinspires.ftc.teamcode.Controller.squid.SquIDController;
-import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
+import org.firstinspires.ftc.teamcode.Drive.CoaxialDrive;
 @Config
 @TeleOp(name="cheezitsSwerve", group="CheezitsTeleOp")
 public class SquIDTuner extends LinearOpMode {

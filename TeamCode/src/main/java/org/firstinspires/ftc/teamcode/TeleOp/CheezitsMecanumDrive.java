@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.Drive.Commands.Mecanum.DriveCommand;
-import org.firstinspires.ftc.teamcode.Drive.Commands.Mecanum.MecanumDriveSubsystem;
+import org.firstinspires.ftc.teamcode.Drive.MecanumDriveSubsystem;
 
 public class CheezitsMecanumDrive extends LinearOpMode {
     public Gamepad gamepad1; // only take inputs from gamepad1 for now

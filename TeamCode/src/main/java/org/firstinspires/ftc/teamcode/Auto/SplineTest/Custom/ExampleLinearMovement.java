@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial.CoaxialDrive;
+import org.firstinspires.ftc.teamcode.Drive.CoaxialDrive;
 
 // This is an example file using Squid that takes the robot from its starting position to the point (24,0)
 // it continously updates its position and stops when it reaches within 1 inch of the target position
