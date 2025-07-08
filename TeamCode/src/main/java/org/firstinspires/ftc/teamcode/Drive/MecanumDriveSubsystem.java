@@ -64,13 +64,6 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         leftBack.setPower(0);
     }
 
-    public void driveToPose(Pose2d targetPose) {
-        Pose2d currentPose = odo.updatePose(new Pose2d());
-        Pose2d movement = squid.calculate(targetPose, currentPose, new Pose2d(0, 0, new com.arcrobotics.ftclib.geometry.Rotation2d()));
-
-        drive(movement.getY(), movement.getX(), movement.getHeading());
-    }
-
     public void followPath(List<Pose2d> path) {
         PurePursuitController controller = new PurePursuitController(6.0);
         Pose2d pose = odo.updatePose(new Pose2d());
@@ -123,7 +116,7 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         double RemainingDist = 0;
         for (int i = 0; i < path.size() - 1; i++) {
             Pose2d expectedPose = path.get(i);
-            Pose2d currentPose = odo.updatePose(expectedPose);
+            Pose2d currentPose = odo.updatePose(prevPose);
 
             // Calculate dt
             long currentTime = System.currentTimeMillis();
@@ -160,7 +153,7 @@ public class MecanumDriveSubsystem extends SubsystemBase {
                 }
 
                 Pose2d correction = squid.calculate(closestPose, currentPose, velocityVector);
-                driveToPose(correction);
+                driveToPose(correction, currentPose, velocityVector);
             }
 
             // Get lookahead point
@@ -206,10 +199,35 @@ public class MecanumDriveSubsystem extends SubsystemBase {
             driveToPose(new Pose2d(
                     ffx + movement.getX(),
                     ffy + movement.getY(),
-                    new Rotation2d(movement.getHeading())
-            ));
+                    new Rotation2d(movement.getHeading())),
+                    currentPose,
+                    velocityVector
+            );
             prevPose = currentPose;
         }
         Log.i("MOVING ROBOT", "PURE PURSUIT FINISHED");
     }
+    public void driveToPose(Pose2d targetPose, Pose2d currentPose, Pose2d velocityVector) {
+        double dx = targetPose.getX() - currentPose.getX();
+        double dy = targetPose.getY() - currentPose.getY();
+        double dt = targetPose.getHeading() - currentPose.getHeading();
+
+        long startTime = System.currentTimeMillis();
+
+        while (Math.abs(dx) >= 0.01 || Math.abs(dy) >= 0.01 || Math.abs(dt) >= 0.01) {
+            // Exit if it takes too long
+            if (System.currentTimeMillis() - startTime >= 2000) break;
+
+            currentPose = odo.updatePose(currentPose);
+
+            drive(velocityVector.getY(), velocityVector.getX(), velocityVector.getHeading());
+
+            dx = targetPose.getX() - currentPose.getX();
+            dy = targetPose.getY() - currentPose.getY();
+            dt = targetPose.getHeading() - currentPose.getHeading();
+        }
+
+        stop(); // Optional — stop once you reach target
+    }
+
 }
