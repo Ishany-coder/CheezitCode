@@ -33,11 +33,12 @@ public class SquIDTuner extends LinearOpMode {
         waitForStart();
 
         boolean movingForward = true;
+        double vel = 1;
 
         while (opModeIsActive()) {
             Pose2d movement = calculate(targetPose, currentPose, new Pose2d(0, 0, new Rotation2d(0)));
 
-            drive.moveForward();
+            drive.moveForward(vel);
 
             if (Math.abs(currentPose.getX() - targetPose.getX()) < 1) {
                 movingForward = !movingForward;

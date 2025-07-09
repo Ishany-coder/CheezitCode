@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Drive.Commands.Mecanum;
+package org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -8,21 +8,19 @@ import org.firstinspires.ftc.teamcode.Drive.MecanumDriveSubsystem;
 
 import java.util.List;
 
-public class SplineCommand extends CommandBase {
-    private List<Pose2d> path;
+public class DriveToPoseCommand extends CommandBase {
     private MecanumDriveSubsystem drive;
-    private double vel, accel, decel;
-    public SplineCommand(List<Pose2d> path, double vel, double accel, double decel){
-        this.accel = accel;
+    private Pose2d targetPose, currPose, vel;
+    public DriveToPoseCommand(Pose2d targetPose, Pose2d currPose, Pose2d vel){
+        this.targetPose = targetPose;
+        this.currPose = currPose;
         this.vel = vel;
-        this.decel = decel;
-        this.path = path;
     }
     @Override
     public void initialize(){}
     @Override
     public void execute(){
-        drive.MoveSplineWithSplineHeading(path, vel, accel, decel);
+        drive.driveToPose(targetPose, currPose, vel);
     }
     @Override
     public boolean isFinished() {

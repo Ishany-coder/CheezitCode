@@ -20,9 +20,12 @@ import java.util.List;
 
 public class MecanumDriveSubsystem extends SubsystemBase {
 
-    private final DcMotorEx rightFront, rightBack, leftFront, leftBack;
-    private final DrivetrainSquIDController squid;
-    private final Odometery odo;
+    private static DcMotorEx rightFront = null;
+    private static DcMotorEx rightBack = null;
+    private static DcMotorEx leftFront = null;
+    private static DcMotorEx leftBack = null;
+    private static DrivetrainSquIDController squid = new DrivetrainSquIDController();
+    private static Odometery odo = null;
     public static double KV = 0.1;
     public static double KA = 0.1;
 
@@ -43,7 +46,7 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         Log.i("MECANUM DRIVE", "Initialized");
     }
 
-    public void drive(double forward, double strafe, double rotation) {
+    public static void drive(double forward, double strafe, double rotation) {
         double rf = forward - strafe - rotation;
         double rb = forward + strafe - rotation;
         double lf = forward + strafe + rotation;
@@ -57,14 +60,14 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         Log.i("MECANUM POWER", "RF: " + rf + " LF: " + lf + " RB: " + rb + " LB: " + lb);
     }
 
-    public void stop() {
+    public static void stop() {
         rightFront.setPower(0);
         rightBack.setPower(0);
         leftFront.setPower(0);
         leftBack.setPower(0);
     }
 
-    public void followPath(List<Pose2d> path) {
+    public static void followPath(List<Pose2d> path) {
         PurePursuitController controller = new PurePursuitController(6.0);
         Pose2d pose = odo.updatePose(new Pose2d());
 

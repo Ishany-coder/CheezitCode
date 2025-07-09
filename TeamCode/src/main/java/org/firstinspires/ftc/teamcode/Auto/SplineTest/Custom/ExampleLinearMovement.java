@@ -14,6 +14,7 @@ public class ExampleLinearMovement extends LinearOpMode {
     private CoaxialDrive myHardware;
     private Pose2d currentPose;
     private Pose2d targetPose;
+    double vel = 1;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -30,7 +31,7 @@ public class ExampleLinearMovement extends LinearOpMode {
         targetPose = new Pose2d(24, 0, new Rotation2d(0)); // Move to (24,0)
         while (opModeIsActive()) {
             // Calculate movement using SquIDController
-            myHardware.MoveRobotLinear(targetPose, currentPose);
+            myHardware.MoveRobotLinear(targetPose, currentPose, 1);
         }
     }
 }

@@ -25,14 +25,16 @@ public class customSplineMovementCubic extends LinearOpMode {
     private Pose2d endPose = new Pose2d(10,10, new Rotation2d(0));
     @Override
     public void runOpMode() throws InterruptedException {
-        drive = new CoaxialDrive(hardwareMap);
+        double vel = 1;
+        double accel = 1;
+        double decel = 1;
         spline = new GenerateSpline();
         squid = new DrivetrainSquIDController();
         midPoints.add(new Translation2d(5, 5)); // Make midpoints with 5,5
         waitForStart();
         while(opModeIsActive()){
             path = spline.makeCubicSpline(startPose, midPoints, endPose); // get a list of points in path
-            new SplineCommand(drive, path);
+            new SplineCommand(path, vel, accel, decel);
         }
     }
 }

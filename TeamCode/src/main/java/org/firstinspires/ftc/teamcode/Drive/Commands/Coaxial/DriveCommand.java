@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode.Drive.Commands.Mecanum;
+package org.firstinspires.ftc.teamcode.Drive.Commands.Coaxial;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 
+import org.firstinspires.ftc.teamcode.Drive.CoaxialDrive;
 import org.firstinspires.ftc.teamcode.Drive.MecanumDriveSubsystem;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class DriveCommand extends CommandBase {
     public void initialize(){}
     @Override
     public void execute(){
-        MecanumDriveSubsystem.drive(y,x,t);
+        CoaxialDrive.drive(y,x,t);
     }
     @Override
     public boolean isFinished() {
@@ -27,6 +28,6 @@ public class DriveCommand extends CommandBase {
     }
     @Override
     public void end(boolean Interupted){
-        MecanumDriveSubsystem.stop();
+        CoaxialDrive.stop();
     }
 }

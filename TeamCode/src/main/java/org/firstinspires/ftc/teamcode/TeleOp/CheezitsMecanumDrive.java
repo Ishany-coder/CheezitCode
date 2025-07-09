@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -21,7 +22,7 @@ public class CheezitsMecanumDrive extends LinearOpMode {
             Forward = -gamepad1.left_stick_y;
             Strafe = gamepad1.left_stick_x;
             Turn = gamepad1.right_stick_x;
-            new DriveCommand(drive, Strafe, Forward, Turn);
+            CommandScheduler.getInstance().schedule(new DriveCommand(Strafe, Forward, Turn));
         }
     }
 }
