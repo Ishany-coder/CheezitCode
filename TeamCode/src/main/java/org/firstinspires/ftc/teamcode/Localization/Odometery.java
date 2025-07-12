@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Drive;
+package org.firstinspires.ftc.teamcode.Localization;
 
 import static org.firstinspires.ftc.teamcode.RobotConstants.*;
 
@@ -14,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+//Up is x and right is y
+// like so 🔼x ➡️y 🔄 Heading
 @Config
 public class Odometery {
     public DcMotorEx Odo1;
@@ -51,7 +53,7 @@ public class Odometery {
         while (angle < -180) angle += 360;
         return angle;
     }
-
+    //currently uses linear odo but soon use arcs for better accuracy as it takes less samples for same result
     public Pose2d updatePose(Pose2d currentPose) {
         if (Double.isNaN(Encoder1PrevTicks)) {
             Encoder1PrevTicks = Odo1.getCurrentPosition();

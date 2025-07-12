@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.Controller.FeedForward.FeedforwardController;
 import org.firstinspires.ftc.teamcode.Controller.PurePursuit.PurePursuitController;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
+import org.firstinspires.ftc.teamcode.Localization.Odometery;
 
 import com.arcrobotics.ftclib.geometry.Pose2d;
 
@@ -51,7 +52,18 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         double rb = forward + strafe - rotation;
         double lf = forward + strafe + rotation;
         double lb = forward - strafe + rotation;
-
+        if(rf>1){
+            rf=1;
+        }
+        if(rb>1){
+            rb=1;
+        }
+        if(lf>1){
+            lf=1;
+        }
+        if(lb>1){
+            lb=1;
+        }
         rightFront.setPower(rf);
         rightBack.setPower(rb);
         leftFront.setPower(lf);
@@ -66,25 +78,6 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         leftFront.setPower(0);
         leftBack.setPower(0);
     }
-
-    public static void followPath(List<Pose2d> path) {
-        PurePursuitController controller = new PurePursuitController(6.0);
-        Pose2d pose = odo.updatePose(new Pose2d());
-
-        while (!controller.isFinished(path, pose, 1.0)) {
-            pose = odo.updatePose(pose);
-            Pose2d lookahead = controller.getLookaheadPoint(path, pose);
-            Pose2d movement = squid.calculate(lookahead, pose, lookahead);
-            drive(movement.getY(), movement.getX(), 0);
-        }
-
-        stop();
-    }
-
-    public Pose2d getCurrentPose() {
-        return odo.updatePose(new Pose2d());
-    }
-
     public void moveForward() {
         Log.i("MOVING ROBOT: ", "FORWARD");
         if (MotorSpeed < 0) {
@@ -232,5 +225,4 @@ public class MecanumDriveSubsystem extends SubsystemBase {
 
         stop(); // Optional — stop once you reach target
     }
-
 }
