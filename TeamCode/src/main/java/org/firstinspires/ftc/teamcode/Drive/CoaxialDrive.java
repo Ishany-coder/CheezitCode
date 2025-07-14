@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.Controller.FeedForward.FeedforwardController;
 import org.firstinspires.ftc.teamcode.Controller.PurePursuit.PurePursuitController;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
-import org.firstinspires.ftc.teamcode.Localization.Odometery;
+import org.firstinspires.ftc.teamcode.Localization.Odo.Odometery;
 
 import java.util.List;
 

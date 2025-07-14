@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Controller.FeedForward.FeedforwardControll
 import org.firstinspires.ftc.teamcode.Controller.PurePursuit.PurePursuitController;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
 import org.firstinspires.ftc.teamcode.Drive.CoaxialDrive;
-import org.firstinspires.ftc.teamcode.Localization.Odometery;
+import org.firstinspires.ftc.teamcode.Localization.Odo.Odometery;
 
 import java.util.ArrayList;
 import java.util.List;

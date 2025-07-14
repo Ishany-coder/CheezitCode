@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.*;
 import org.firstinspires.ftc.teamcode.Controller.FeedForward.FeedforwardController;
 import org.firstinspires.ftc.teamcode.Controller.PurePursuit.PurePursuitController;
 import org.firstinspires.ftc.teamcode.Controller.squid.DrivetrainSquIDController;
-import org.firstinspires.ftc.teamcode.Localization.Odometery;
+import org.firstinspires.ftc.teamcode.Localization.Odo.Odometery;
 
 import com.arcrobotics.ftclib.geometry.Pose2d;
 

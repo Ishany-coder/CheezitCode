@@ -5,19 +5,20 @@ import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Localization.AprilTag;
+import org.firstinspires.ftc.teamcode.Localization.AprilTag.AprilTagOpenCV;
+import org.firstinspires.ftc.teamcode.Localization.AprilTag.AprilTagOpenCV;
 
 import java.util.Collections;
 import java.util.List;
 
 @Autonomous
-public class AprilTagLocalizer extends LinearOpMode {
+public class AprilTagLocalizerOpenCv extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d currentPose = new Pose2d(0,0,new Rotation2d(0));
         Pose2d newPose;
         List<Pose2d> possiblePoses = Collections.emptyList();
-        AprilTag aprilTag = new AprilTag(this.telemetry, this.hardwareMap);
+        AprilTagOpenCV aprilTag = new AprilTagOpenCV(this.telemetry, this.hardwareMap);
         while(opModeIsActive()){
             possiblePoses = aprilTag.updatePose(currentPose);
             newPose = possiblePoses.get(0);
