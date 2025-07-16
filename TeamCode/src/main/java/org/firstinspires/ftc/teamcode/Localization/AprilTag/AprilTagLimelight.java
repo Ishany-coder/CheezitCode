@@ -13,7 +13,7 @@ public class AprilTagLimelight {
     public static double height = 10;
     public static double angle = 30;
     private Limelight3A limelight;
-    private int AprilTagPipeline = 0; //AprilTag pipeling
+    private int AprilTagPipeline = 7; //AprilTag pipeling kumbaya
     public AprilTagLimelight(HardwareMap hwMap){
         limelight = hwMap.get(Limelight3A.class, "Limelight"); // get the limelight
         limelight.pipelineSwitch(AprilTagPipeline);

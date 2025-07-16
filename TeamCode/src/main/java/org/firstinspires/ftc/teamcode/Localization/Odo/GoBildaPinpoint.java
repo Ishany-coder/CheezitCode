@@ -20,7 +20,7 @@
  *   SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode.Localization.Pinpoint;
+package org.firstinspires.ftc.teamcode.Localization.Odo;
 
 import static com.qualcomm.robotcore.util.TypeConversion.byteArrayToInt;
 

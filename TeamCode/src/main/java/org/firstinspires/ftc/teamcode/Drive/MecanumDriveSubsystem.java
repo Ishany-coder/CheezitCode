@@ -43,7 +43,7 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         }
 
         squid = new DrivetrainSquIDController();
-        odo = new Odometery(rightFront, leftFront, rightBack, hardwareMap);
+        odo = new Odometery(hardwareMap);
         Log.i("MECANUM DRIVE", "Initialized");
     }
 

@@ -21,6 +21,7 @@ public class Odometery {
     public DcMotorEx Odo1;
     public DcMotorEx Odo2;
     public DcMotorEx Odo3;
+    private Pose2d currentPose;
 
     public double Encoder1PrevTicks = Double.NaN;
     public double Encoder2PrevTicks = Double.NaN;
@@ -31,15 +32,15 @@ public class Odometery {
     public static double IMUweight = 0.8;
     public static double Encweight = 0.2;
 
-    public Odometery(DcMotorEx Odo1, DcMotorEx Odo2, DcMotorEx Odo3, HardwareMap hardwareMap) {
+    public Odometery(HardwareMap hardwareMap) {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters params = new BNO055IMU.Parameters();
         params.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         imu.initialize(params);
         while (!imu.isGyroCalibrated()) {}
-        this.Odo1 = Odo1;
-        this.Odo2 = Odo2;
-        this.Odo3 = Odo3;
+        this.Odo1 = hardwareMap.get(DcMotorEx.class, "RightFront");
+        this.Odo2 = hardwareMap.get(DcMotorEx.class, "LeftFront");
+        this.Odo3 = hardwareMap.get(DcMotorEx.class, "RightBack");
         lastIMUHeadingDeg = getIMUYaw();
     }
 
@@ -90,6 +91,13 @@ public class Odometery {
         Encoder3PrevTicks = Odo3.getCurrentPosition();
         lastIMUHeadingDeg = IMUTheta;
 
-        return new Pose2d(NewX, NewY, Rotation2d.fromDegrees(FusedTheta));
+        currentPose = new Pose2d(NewX, NewY, Rotation2d.fromDegrees(FusedTheta));
+        return (currentPose);
+    }
+    public Pose2d getCurrentPose(){
+        return currentPose; // return the current Pose after calculation
+    }
+    public void setCurrentPose(Pose2d currentPose){
+        this.currentPose = currentPose;
     }
 }

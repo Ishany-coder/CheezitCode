@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.SplineTest.Custom;
+package org.firstinspires.ftc.teamcode.Auto;
 
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;

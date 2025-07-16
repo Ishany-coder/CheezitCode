@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto.Tuner;
+package org.firstinspires.ftc.teamcode.Tuner;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.geometry.Transform2d;

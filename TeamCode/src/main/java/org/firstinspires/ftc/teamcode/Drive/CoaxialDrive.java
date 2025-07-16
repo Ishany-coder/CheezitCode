@@ -61,7 +61,7 @@ public class CoaxialDrive extends SubsystemBase {
         LeftFrontServo = hardwareMap.get(Servo.class, "LeftFrontServo");
         RightBackServo = hardwareMap.get(Servo.class, "RightBackServo");
         LeftBackServo = hardwareMap.get(Servo.class, "LeftBackServo");
-        odo = new Odometery(RightFrontMotor, LeftFrontMotor, RightBackMotor, hardwareMap);
+        odo = new Odometery(hardwareMap);
     }
 
     public static void turn(double angle) {
@@ -328,11 +328,11 @@ public class CoaxialDrive extends SubsystemBase {
         RightBackServo.setPosition((brAngle + Math.PI) / (2 * Math.PI));
     }
     public void Strafe(boolean Right, double velocity){
-        turn(90);
-        if (Right) {
-            moveForward(velocity);
-        } else {
-            moveBackward(velocity);
-        }
+        CommandScheduler.getInstance().schedule(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> turn(90)),
+                        new InstantCommand(() -> moveForward(Right ? velocity : -velocity))
+                )
+        );
     }
 }
